@@ -77,7 +77,7 @@
     "owner": "TV4",
     "reviewer": "TV1",
     "title": "[W02][TV4] Dựng môi trường và hợp đồng API",
-    "body": "## Công việc\n\nDựng PostgreSQL, SQLAlchemy và Alembic migration\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "body": "## Công việc\n\nDựng MySQL, SQLAlchemy và Alembic migration\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
     "depends_on_week": 1
   },
   {

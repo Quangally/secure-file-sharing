@@ -31,7 +31,7 @@ Mỗi người viết phần báo cáo của phần mình làm; TV5 tổng hợp
 | TV1 | Dựng FastAPI, cấu hình, CORS và CI |
 | TV2 | Thử AES/RSA/SHA bằng Web Crypto, viết kiểm thử âm |
 | TV3 | Dựng React, layout và điều hướng |
-| TV4 | Dựng PostgreSQL, SQLAlchemy và Alembic migration |
+| TV4 | Dựng MySQL, SQLAlchemy và Alembic migration |
 | TV5 | Chạy lại setup trên máy khác, chuẩn bị fixture giả |
 
 **Điều kiện hoàn thành:** Cả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.

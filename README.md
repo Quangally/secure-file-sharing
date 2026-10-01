@@ -10,7 +10,7 @@
 
 - Frontend: React + Vite, JavaScript, Web Crypto API.
 - Backend: Python 3.11+ + FastAPI, SQLAlchemy + Alembic.
-- Database: PostgreSQL (Docker chỉ chạy database ở bộ khung).
+- Database: MySQL 8.4 (cài trực tiếp hoặc chạy database bằng Docker).
 - Mật mã bản đầu: AES-256-GCM + RSA-OAEP 2048/SHA-256. ECC là mở rộng.
 - Mật khẩu đăng nhập: Argon2id, không mã hóa hai chiều.
 
@@ -50,7 +50,7 @@ Linux/macOS: dùng `python3 -m venv .venv`, sau đó `.venv/bin/python -m pip in
 
 Frontend: http://localhost:5173. API: http://localhost:8000/health. Swagger: http://localhost:8000/docs.
 
-Database tùy chọn: sao chép `.env.example` thành `.env`, điền giá trị local, chạy `docker compose up -d db`. Backend health hiện chưa kết nối database.
+Database: xem [hướng dẫn MySQL](docs/database/mysql-setup.md). Nếu dùng Docker, sao chép `.env.example` thành `.env`, thay mật khẩu mẫu rồi chạy `docker compose up -d db`. Nếu đã cài MySQL Server, dùng trực tiếp, không cần Docker. Backend health hiện chưa kết nối database; ORM và migration được triển khai theo kế hoạch.
 
 ## Kiểm tra
 
