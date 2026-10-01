@@ -1,0 +1,407 @@
+[
+  {
+    "id": "W01-TV1",
+    "week": 1,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W01][TV1] Phân tích và thống nhất phạm vi",
+    "body": "## Công việc\n\nChốt yêu cầu, use case và phạm vi MVP\n\n## Mốc nghiệm thu chung tuần 1\n\nDuyệt yêu cầu, ERD, wireframe, API và quy tắc quản lý khóa; cả 5 người giải thích được E2EE.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": null
+  },
+  {
+    "id": "W01-TV2",
+    "week": 1,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W01][TV2] Phân tích và thống nhất phạm vi",
+    "body": "## Công việc\n\nMô tả luồng mật mã, chọn tham số, threat model\n\n## Mốc nghiệm thu chung tuần 1\n\nDuyệt yêu cầu, ERD, wireframe, API và quy tắc quản lý khóa; cả 5 người giải thích được E2EE.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": null
+  },
+  {
+    "id": "W01-TV3",
+    "week": 1,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W01][TV3] Phân tích và thống nhất phạm vi",
+    "body": "## Công việc\n\nWireframe đăng nhập, kho tệp, chia sẻ, quản lý khóa\n\n## Mốc nghiệm thu chung tuần 1\n\nDuyệt yêu cầu, ERD, wireframe, API và quy tắc quản lý khóa; cả 5 người giải thích được E2EE.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": null
+  },
+  {
+    "id": "W01-TV4",
+    "week": 1,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W01][TV4] Phân tích và thống nhất phạm vi",
+    "body": "## Công việc\n\nERD, mô hình key envelope và API dự kiến\n\n## Mốc nghiệm thu chung tuần 1\n\nDuyệt yêu cầu, ERD, wireframe, API và quy tắc quản lý khóa; cả 5 người giải thích được E2EE.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": null
+  },
+  {
+    "id": "W01-TV5",
+    "week": 1,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W01][TV5] Phân tích và thống nhất phạm vi",
+    "body": "## Công việc\n\nMa trận kiểm thử, khung báo cáo, tổng hợp tài liệu\n\n## Mốc nghiệm thu chung tuần 1\n\nDuyệt yêu cầu, ERD, wireframe, API và quy tắc quản lý khóa; cả 5 người giải thích được E2EE.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": null
+  },
+  {
+    "id": "W02-TV1",
+    "week": 2,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W02][TV1] Dựng môi trường và hợp đồng API",
+    "body": "## Công việc\n\nDựng FastAPI, cấu hình, CORS và CI\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 1
+  },
+  {
+    "id": "W02-TV2",
+    "week": 2,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W02][TV2] Dựng môi trường và hợp đồng API",
+    "body": "## Công việc\n\nThử AES/RSA/SHA bằng Web Crypto, viết kiểm thử âm\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 1
+  },
+  {
+    "id": "W02-TV3",
+    "week": 2,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W02][TV3] Dựng môi trường và hợp đồng API",
+    "body": "## Công việc\n\nDựng React, layout và điều hướng\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 1
+  },
+  {
+    "id": "W02-TV4",
+    "week": 2,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W02][TV4] Dựng môi trường và hợp đồng API",
+    "body": "## Công việc\n\nDựng PostgreSQL, SQLAlchemy và Alembic migration\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 1
+  },
+  {
+    "id": "W02-TV5",
+    "week": 2,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W02][TV5] Dựng môi trường và hợp đồng API",
+    "body": "## Công việc\n\nChạy lại setup trên máy khác, chuẩn bị fixture giả\n\n## Mốc nghiệm thu chung tuần 2\n\nCả 5 máy chạy được frontend, backend /health và database; thống nhất payload upload/share.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 1
+  },
+  {
+    "id": "W03-TV1",
+    "week": 3,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W03][TV1] Tài khoản và quản lý khóa",
+    "body": "## Công việc\n\nĐăng ký/đăng nhập, Argon2id, session/token hết hạn\n\n## Mốc nghiệm thu chung tuần 3\n\nĐăng nhập lại trên cùng thiết bị vẫn mở được khóa; server không có private key rõ. Chốt giới hạn một thiết bị và cách xác minh fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 2
+  },
+  {
+    "id": "W03-TV2",
+    "week": 3,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W03][TV2] Tài khoản và quản lý khóa",
+    "body": "## Công việc\n\nSinh khóa trên client; khóa riêng non-extractable trong IndexedDB; fingerprint\n\n## Mốc nghiệm thu chung tuần 3\n\nĐăng nhập lại trên cùng thiết bị vẫn mở được khóa; server không có private key rõ. Chốt giới hạn một thiết bị và cách xác minh fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 2
+  },
+  {
+    "id": "W03-TV3",
+    "week": 3,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W03][TV3] Tài khoản và quản lý khóa",
+    "body": "## Công việc\n\nUI tài khoản, trạng thái mở khóa, hiển thị fingerprint\n\n## Mốc nghiệm thu chung tuần 3\n\nĐăng nhập lại trên cùng thiết bị vẫn mở được khóa; server không có private key rõ. Chốt giới hạn một thiết bị và cách xác minh fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 2
+  },
+  {
+    "id": "W03-TV4",
+    "week": 3,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W03][TV4] Tài khoản và quản lý khóa",
+    "body": "## Công việc\n\nLưu public key có key_id; truy vấn người nhận và khóa\n\n## Mốc nghiệm thu chung tuần 3\n\nĐăng nhập lại trên cùng thiết bị vẫn mở được khóa; server không có private key rõ. Chốt giới hạn một thiết bị và cách xác minh fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 2
+  },
+  {
+    "id": "W03-TV5",
+    "week": 3,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W03][TV5] Tài khoản và quản lý khóa",
+    "body": "## Công việc\n\nTest sai mật khẩu, token hết hạn, đăng nhập lại và giữ khóa\n\n## Mốc nghiệm thu chung tuần 3\n\nĐăng nhập lại trên cùng thiết bị vẫn mở được khóa; server không có private key rõ. Chốt giới hạn một thiết bị và cách xác minh fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 2
+  },
+  {
+    "id": "W04-TV1",
+    "week": 4,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W04][TV1] Mã hóa và tải lên",
+    "body": "## Công việc\n\nTích hợp upload API và xử lý lỗi/giới hạn\n\n## Mốc nghiệm thu chung tuần 4\n\nChủ tệp tải lên rồi mở lại được sau khi tải lại trang; server chỉ nhận ciphertext và khóa AES đã bọc. MVP giới hạn tệp 25 MiB.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 3
+  },
+  {
+    "id": "W04-TV2",
+    "week": 4,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W04][TV2] Mã hóa và tải lên",
+    "body": "## Công việc\n\nAES key mới mỗi tệp, IV mới, tag; wrap AES key cho chính chủ\n\n## Mốc nghiệm thu chung tuần 4\n\nChủ tệp tải lên rồi mở lại được sau khi tải lại trang; server chỉ nhận ciphertext và khóa AES đã bọc. MVP giới hạn tệp 25 MiB.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 3
+  },
+  {
+    "id": "W04-TV3",
+    "week": 4,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W04][TV3] Mã hóa và tải lên",
+    "body": "## Công việc\n\nChọn tệp, tiến trình mã hóa/upload và danh sách tệp\n\n## Mốc nghiệm thu chung tuần 4\n\nChủ tệp tải lên rồi mở lại được sau khi tải lại trang; server chỉ nhận ciphertext và khóa AES đã bọc. MVP giới hạn tệp 25 MiB.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 3
+  },
+  {
+    "id": "W04-TV4",
+    "week": 4,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W04][TV4] Mã hóa và tải lên",
+    "body": "## Công việc\n\nLưu ciphertext, owner envelope và metadata; rollback upload lỗi\n\n## Mốc nghiệm thu chung tuần 4\n\nChủ tệp tải lên rồi mở lại được sau khi tải lại trang; server chỉ nhận ciphertext và khóa AES đã bọc. MVP giới hạn tệp 25 MiB.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 3
+  },
+  {
+    "id": "W04-TV5",
+    "week": 4,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W04][TV5] Mã hóa và tải lên",
+    "body": "## Công việc\n\nTest round-trip tệp rỗng/nhị phân, kiểm tra request và storage\n\n## Mốc nghiệm thu chung tuần 4\n\nChủ tệp tải lên rồi mở lại được sau khi tải lại trang; server chỉ nhận ciphertext và khóa AES đã bọc. MVP giới hạn tệp 25 MiB.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 3
+  },
+  {
+    "id": "W05-TV1",
+    "week": 5,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W05][TV1] Chia sẻ và quyền truy cập",
+    "body": "## Công việc\n\nAPI tìm người nhận, authorization và tích hợp share\n\n## Mốc nghiệm thu chung tuần 5\n\nA chia sẻ cho B; C bị từ chối; mỗi envelope gắn file_id, user_id và key_id. Chủ tệp có thể chia sẻ lại mà không upload lại tệp.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 4
+  },
+  {
+    "id": "W05-TV2",
+    "week": 5,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W05][TV2] Chia sẻ và quyền truy cập",
+    "body": "## Công việc\n\nUnwrap owner envelope rồi wrap AES key cho người nhận; kiểm tra fingerprint\n\n## Mốc nghiệm thu chung tuần 5\n\nA chia sẻ cho B; C bị từ chối; mỗi envelope gắn file_id, user_id và key_id. Chủ tệp có thể chia sẻ lại mà không upload lại tệp.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 4
+  },
+  {
+    "id": "W05-TV3",
+    "week": 5,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W05][TV3] Chia sẻ và quyền truy cập",
+    "body": "## Công việc\n\nModal chia sẻ, xác nhận fingerprint, Shared with me\n\n## Mốc nghiệm thu chung tuần 5\n\nA chia sẻ cho B; C bị từ chối; mỗi envelope gắn file_id, user_id và key_id. Chủ tệp có thể chia sẻ lại mà không upload lại tệp.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 4
+  },
+  {
+    "id": "W05-TV4",
+    "week": 5,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W05][TV4] Chia sẻ và quyền truy cập",
+    "body": "## Công việc\n\nFile share, recipient envelope, thu hồi và audit log\n\n## Mốc nghiệm thu chung tuần 5\n\nA chia sẻ cho B; C bị từ chối; mỗi envelope gắn file_id, user_id và key_id. Chủ tệp có thể chia sẻ lại mà không upload lại tệp.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 4
+  },
+  {
+    "id": "W05-TV5",
+    "week": 5,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W05][TV5] Chia sẻ và quyền truy cập",
+    "body": "## Công việc\n\nTest người C không được xem/tải/bọc khóa của tệp A→B\n\n## Mốc nghiệm thu chung tuần 5\n\nA chia sẻ cho B; C bị từ chối; mỗi envelope gắn file_id, user_id và key_id. Chủ tệp có thể chia sẻ lại mà không upload lại tệp.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 4
+  },
+  {
+    "id": "W06-TV1",
+    "week": 6,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W06][TV1] Tải xuống và giải mã hoàn chỉnh",
+    "body": "## Công việc\n\nDownload ciphertext API và xử lý session hết hạn\n\n## Mốc nghiệm thu chung tuần 6\n\nB tải được tệp giống bản gốc; ciphertext bị sửa/sai khóa bị từ chối; thu hồi chặn lượt tải mới. Ghi rõ không thể xóa bản B đã tải.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 5
+  },
+  {
+    "id": "W06-TV2",
+    "week": 6,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W06][TV2] Tải xuống và giải mã hoàn chỉnh",
+    "body": "## Công việc\n\nUnwrap bằng khóa riêng, AES decrypt, xác minh GCM và SHA ciphertext\n\n## Mốc nghiệm thu chung tuần 6\n\nB tải được tệp giống bản gốc; ciphertext bị sửa/sai khóa bị từ chối; thu hồi chặn lượt tải mới. Ghi rõ không thể xóa bản B đã tải.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 5
+  },
+  {
+    "id": "W06-TV3",
+    "week": 6,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W06][TV3] Tải xuống và giải mã hoàn chỉnh",
+    "body": "## Công việc\n\nUI tải/giải mã/lưu tệp, thông báo lỗi rõ ràng\n\n## Mốc nghiệm thu chung tuần 6\n\nB tải được tệp giống bản gốc; ciphertext bị sửa/sai khóa bị từ chối; thu hồi chặn lượt tải mới. Ghi rõ không thể xóa bản B đã tải.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 5
+  },
+  {
+    "id": "W06-TV4",
+    "week": 6,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W06][TV4] Tải xuống và giải mã hoàn chỉnh",
+    "body": "## Công việc\n\nChặn download/envelope sau thu hồi; kiểm tra quyền mọi endpoint\n\n## Mốc nghiệm thu chung tuần 6\n\nB tải được tệp giống bản gốc; ciphertext bị sửa/sai khóa bị từ chối; thu hồi chặn lượt tải mới. Ghi rõ không thể xóa bản B đã tải.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 5
+  },
+  {
+    "id": "W06-TV5",
+    "week": 6,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W06][TV5] Tải xuống và giải mã hoàn chỉnh",
+    "body": "## Công việc\n\nTest A→B từ đầu đến cuối, sai khóa và ciphertext bị sửa\n\n## Mốc nghiệm thu chung tuần 6\n\nB tải được tệp giống bản gốc; ciphertext bị sửa/sai khóa bị từ chối; thu hồi chặn lượt tải mới. Ghi rõ không thể xóa bản B đã tải.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 5
+  },
+  {
+    "id": "W07-TV1",
+    "week": 7,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W07][TV1] Kiểm thử bảo mật và sửa lỗi",
+    "body": "## Công việc\n\nSửa lỗi xác thực, IDOR, giới hạn request/upload\n\n## Mốc nghiệm thu chung tuần 7\n\nĐạt ma trận bảo mật: sửa ciphertext, tag/IV/AAD; sai private key; C truy cập; token hết hạn; thu hồi; key substitution được cảnh báo theo quy trình fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 6
+  },
+  {
+    "id": "W07-TV2",
+    "week": 7,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W07][TV2] Kiểm thử bảo mật và sửa lỗi",
+    "body": "## Công việc\n\nRà IV, key exposure, GCM, fingerprint và key substitution\n\n## Mốc nghiệm thu chung tuần 7\n\nĐạt ma trận bảo mật: sửa ciphertext, tag/IV/AAD; sai private key; C truy cập; token hết hạn; thu hồi; key substitution được cảnh báo theo quy trình fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 6
+  },
+  {
+    "id": "W07-TV3",
+    "week": 7,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W07][TV3] Kiểm thử bảo mật và sửa lỗi",
+    "body": "## Công việc\n\nXử lý lỗi UI, tránh XSS, xóa dữ liệu nhạy cảm khỏi log\n\n## Mốc nghiệm thu chung tuần 7\n\nĐạt ma trận bảo mật: sửa ciphertext, tag/IV/AAD; sai private key; C truy cập; token hết hạn; thu hồi; key substitution được cảnh báo theo quy trình fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 6
+  },
+  {
+    "id": "W07-TV4",
+    "week": 7,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W07][TV4] Kiểm thử bảo mật và sửa lỗi",
+    "body": "## Công việc\n\nRà storage path, giao dịch, quyền truy cập và log\n\n## Mốc nghiệm thu chung tuần 7\n\nĐạt ma trận bảo mật: sửa ciphertext, tag/IV/AAD; sai private key; C truy cập; token hết hạn; thu hồi; key substitution được cảnh báo theo quy trình fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 6
+  },
+  {
+    "id": "W07-TV5",
+    "week": 7,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W07][TV5] Kiểm thử bảo mật và sửa lỗi",
+    "body": "## Công việc\n\nThực hiện bộ test bảo mật; ghi bằng chứng; tái kiểm thử\n\n## Mốc nghiệm thu chung tuần 7\n\nĐạt ma trận bảo mật: sửa ciphertext, tag/IV/AAD; sai private key; C truy cập; token hết hạn; thu hồi; key substitution được cảnh báo theo quy trình fingerprint.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 6
+  },
+  {
+    "id": "W08-TV1",
+    "week": 8,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W08][TV1] Thực nghiệm và ổn định",
+    "body": "## Công việc\n\nTích hợp bản ổn định, hướng dẫn môi trường HTTPS\n\n## Mốc nghiệm thu chung tuần 8\n\nCó kết quả đo thật kèm máy/trình duyệt/số lần; tách thời gian mã hóa khỏi mạng. 50/100 MiB chỉ mở rộng nếu thiết kế và bộ nhớ đáp ứng.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 7
+  },
+  {
+    "id": "W08-TV2",
+    "week": 8,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W08][TV2] Thực nghiệm và ổn định",
+    "body": "## Công việc\n\nĐo AES encrypt/decrypt, RSA wrap/unwrap; kiểm tra bộ nhớ\n\n## Mốc nghiệm thu chung tuần 8\n\nCó kết quả đo thật kèm máy/trình duyệt/số lần; tách thời gian mã hóa khỏi mạng. 50/100 MiB chỉ mở rộng nếu thiết kế và bộ nhớ đáp ứng.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 7
+  },
+  {
+    "id": "W08-TV3",
+    "week": 8,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W08][TV3] Thực nghiệm và ổn định",
+    "body": "## Công việc\n\nHoàn thiện responsive, trạng thái rỗng và tiến trình\n\n## Mốc nghiệm thu chung tuần 8\n\nCó kết quả đo thật kèm máy/trình duyệt/số lần; tách thời gian mã hóa khỏi mạng. 50/100 MiB chỉ mở rộng nếu thiết kế và bộ nhớ đáp ứng.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 7
+  },
+  {
+    "id": "W08-TV4",
+    "week": 8,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W08][TV4] Thực nghiệm và ổn định",
+    "body": "## Công việc\n\nĐo upload/download, tối ưu truy vấn và dọn dữ liệu thử\n\n## Mốc nghiệm thu chung tuần 8\n\nCó kết quả đo thật kèm máy/trình duyệt/số lần; tách thời gian mã hóa khỏi mạng. 50/100 MiB chỉ mở rộng nếu thiết kế và bộ nhớ đáp ứng.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 7
+  },
+  {
+    "id": "W08-TV5",
+    "week": 8,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W08][TV5] Thực nghiệm và ổn định",
+    "body": "## Công việc\n\nĐo lặp 10 lần cho 1/10/25 MiB, lập bảng/biểu đồ thực nghiệm\n\n## Mốc nghiệm thu chung tuần 8\n\nCó kết quả đo thật kèm máy/trình duyệt/số lần; tách thời gian mã hóa khỏi mạng. 50/100 MiB chỉ mở rộng nếu thiết kế và bộ nhớ đáp ứng.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 7
+  },
+  {
+    "id": "W09-TV1",
+    "week": 9,
+    "owner": "TV1",
+    "reviewer": "TV4",
+    "title": "[W09][TV1] Báo cáo và bảo vệ",
+    "body": "## Công việc\n\nViết kiến trúc/tích hợp; đóng phiên bản v1.0\n\n## Mốc nghiệm thu chung tuần 9\n\nBáo cáo, slide, repo và demo A→B hoàn chỉnh; demo C bị chặn và ciphertext bị sửa; cả 5 người trả lời được luồng mật mã.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 8
+  },
+  {
+    "id": "W09-TV2",
+    "week": 9,
+    "owner": "TV2",
+    "reviewer": "TV1",
+    "title": "[W09][TV2] Báo cáo và bảo vệ",
+    "body": "## Công việc\n\nViết thuật toán/khóa/threat model và giới hạn E2EE\n\n## Mốc nghiệm thu chung tuần 9\n\nBáo cáo, slide, repo và demo A→B hoàn chỉnh; demo C bị chặn và ciphertext bị sửa; cả 5 người trả lời được luồng mật mã.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 8
+  },
+  {
+    "id": "W09-TV3",
+    "week": 9,
+    "owner": "TV3",
+    "reviewer": "TV2",
+    "title": "[W09][TV3] Báo cáo và bảo vệ",
+    "body": "## Công việc\n\nChuẩn bị demo/UI, quay video dự phòng\n\n## Mốc nghiệm thu chung tuần 9\n\nBáo cáo, slide, repo và demo A→B hoàn chỉnh; demo C bị chặn và ciphertext bị sửa; cả 5 người trả lời được luồng mật mã.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 8
+  },
+  {
+    "id": "W09-TV4",
+    "week": 9,
+    "owner": "TV4",
+    "reviewer": "TV1",
+    "title": "[W09][TV4] Báo cáo và bảo vệ",
+    "body": "## Công việc\n\nViết database/API, reset dữ liệu demo\n\n## Mốc nghiệm thu chung tuần 9\n\nBáo cáo, slide, repo và demo A→B hoàn chỉnh; demo C bị chặn và ciphertext bị sửa; cả 5 người trả lời được luồng mật mã.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 8
+  },
+  {
+    "id": "W09-TV5",
+    "week": 9,
+    "owner": "TV5",
+    "reviewer": "TV4",
+    "title": "[W09][TV5] Báo cáo và bảo vệ",
+    "body": "## Công việc\n\nViết kiểm thử/kết quả, ghép báo cáo và rà tài liệu\n\n## Mốc nghiệm thu chung tuần 9\n\nBáo cáo, slide, repo và demo A→B hoàn chỉnh; demo C bị chặn và ciphertext bị sửa; cả 5 người trả lời được luồng mật mã.\n\n## Bàn giao\n\n- [ ] Code/tài liệu được commit trong nhánh feature\n- [ ] Có bằng chứng kiểm tra phù hợp\n- [ ] Pull Request được review\n- [ ] Cập nhật tiến độ và phần báo cáo của mình\n",
+    "depends_on_week": 8
+  }
+]
