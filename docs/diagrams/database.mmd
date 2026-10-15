@@ -1,0 +1,59 @@
+erDiagram
+    users ||--o{ auth_sessions : "phiên đăng nhập"
+    users ||--o{ public_keys : "sở hữu khóa"
+    users ||--o{ files : "sở hữu tệp"
+    users ||--o{ file_access : "được cấp quyền"
+    files ||--o{ file_access : "có envelope"
+    public_keys ||--o{ file_access : "bọc cho đúng user"
+    users o|--o{ audit_logs : "thực hiện"
+    files o|--o{ audit_logs : "liên quan"
+    users o|--o{ audit_logs : "người nhận mục tiêu"
+    users {
+        char36 id PK
+        varchar100 full_name
+        varchar254 email UK
+        varchar255 password_hash
+        enum status
+    }
+    auth_sessions {
+        char36 id PK
+        char36 user_id FK
+        binary32 token_hash UK
+        datetime expires_at
+        datetime revoked_at
+    }
+    public_keys {
+        char36 id PK
+        char36 user_id FK
+        json public_key_jwk
+        binary32 fingerprint_sha256 UK
+        tinyint active_slot UK
+        datetime revoked_at
+    }
+    files {
+        char36 id PK
+        char36 owner_id FK
+        varchar160 storage_key UK
+        varbinary12 content_iv
+        varbinary12 metadata_iv
+        varbinary4096 encrypted_metadata
+        enum status
+    }
+    file_access {
+        char36 file_id PK,FK
+        char36 user_id PK,FK
+        char36 owner_id FK
+        char36 key_id FK
+        enum access_type
+        varbinary256 wrapped_aes_key
+        datetime revoked_at
+    }
+    audit_logs {
+        bigint id PK
+        char36 actor_id FK
+        char36 file_id FK
+        char36 target_user_id FK
+        varchar32 action
+        enum outcome
+        datetime occurred_at
+    }
