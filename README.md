@@ -4,32 +4,35 @@
 
 ## Trạng thái
 
-Đây là bộ khung khởi tạo, chưa phải hệ thống chia sẻ tệp hoàn chỉnh. Đã có màn hình React khởi động, API health, module AES/RSA/SHA mẫu và kiểm thử mật mã. Đăng ký, đăng nhập, upload, chia sẻ, IndexedDB và database migration sẽ được nhóm triển khai theo kế hoạch.
+Đã có phần Quang: schema MySQL 6 bảng, Alembic migration, connection factory SQLAlchemy, giao diện kho tệp theo mẫu An, upload/download/xóa, adapter API và kiểm thử. Mã hóa chạy phía client qua Web Crypto; danh sách đọc metadata đã mã hóa. Backend hiện chỉ có /health; các API tài khoản/tệp của Phúc/Vũ và luồng tạo key của Bắc vẫn cần ghép. Chạy repo lúc này có thể báo chưa kết nối tài khoản/API; ứng dụng không tự tạo dữ liệu giả để báo thành công.
+
+Xem **[Bàn giao phần Quang](docs/quang/README.md)** để setup, nhúng trang vào frontend An và xem các phụ thuộc còn lại.
 
 ## Công nghệ đề xuất
 
 - Frontend: React + Vite, JavaScript, Web Crypto API.
 - Backend: Python 3.11+ + FastAPI, SQLAlchemy + Alembic.
 - Database: MySQL 8.4 (cài trực tiếp hoặc chạy database bằng Docker).
-- Mật mã bản đầu: AES-256-GCM + RSA-OAEP 2048/SHA-256. ECC là mở rộng.
+- Nghiên cứu trọng tâm AES-256-GCM; RSA-OAEP 2048/SHA-256 hỗ trợ chia sẻ khóa. Không triển khai ECC trong MVP.
 - Mật khẩu đăng nhập: Argon2id, không mã hóa hai chiều.
 
 ## Cấu trúc
 
 | Thư mục | Phụ trách | Nội dung |
 |---|---|---|
-| frontend/src/pages, components | TV3 | Giao diện |
-| frontend/src/crypto | TV2 + TV3 | Mật mã phía client |
-| frontend/src/services | TV3 + TV1 | Gọi API |
-| backend/app/api, security | TV1 | Xác thực và quyền |
-| backend/app/models, database, services | TV4 | Dữ liệu, tệp và chia sẻ |
-| backend/tests, security-tests | TV5 + cả nhóm | Kiểm thử |
+| frontend/src/pages/MyFilesPage.jsx, components/ConfirmDelete.jsx | Quang | Kho tệp, upload/download/xóa |
+| frontend/src/crypto | Bắc + adapter Quang | Mật mã phía client |
+| frontend/src/services | Quang | Gọi API tệp, phối hợp Phúc/Vũ |
+| backend/app/api, security | Phúc/Vũ | Tài khoản, API tệp và quyền |
+| database, backend/alembic, backend/app/database | Quang | Schema, migration, kết nối MySQL |
+| frontend tài khoản/chia sẻ | An | UI/UX và các trang tài khoản/chia sẻ |
+| backend/tests, security-tests, frontend/src/**/*.test.* | Cả nhóm | Kiểm thử phần phụ trách |
 | docs | Cả nhóm | Thiết kế, kế hoạch, báo cáo |
 | .github | TV1 + TV5 | CI, mẫu Issue và PR |
 
 ## Chạy bộ khung
 
-Frontend (Node.js 22.12+):
+Frontend (Node.js 24.15+ thuộc dòng 24 hoặc Node 22.22.2+ thuộc dòng 22):
 
 ```bash
 cd frontend
@@ -50,7 +53,7 @@ Linux/macOS: dùng `python3 -m venv .venv`, sau đó `.venv/bin/python -m pip in
 
 Frontend: http://localhost:5173. API: http://localhost:8000/health. Swagger: http://localhost:8000/docs.
 
-Database: xem [hướng dẫn MySQL](docs/database/mysql-setup.md). Nếu dùng Docker, sao chép `.env.example` thành `.env`, thay mật khẩu mẫu rồi chạy `docker compose up -d db`. Nếu đã cài MySQL Server, dùng trực tiếp, không cần Docker. Backend health hiện chưa kết nối database; ORM và migration được triển khai theo kế hoạch.
+Database: xem [hướng dẫn MySQL](docs/database/mysql-setup.md). Nếu đã cài MySQL Server 8.4, chạy **database/01_schema.sql** trong Workbench là tạo đủ 6 bảng. Hoặc dùng Docker và Alembic theo hướng dẫn; chọn một cách tạo bảng. Backend /health hiện chưa truy vấn database.
 
 ## Kiểm tra
 
@@ -62,6 +65,8 @@ python -m compileall backend/app
 ```
 
 Sau khi cài frontend: `cd frontend` rồi `npm run build`.
+
+Kiểm tra phần Quang: `cd frontend`, chạy `npm test` (component, HTTP adapter, IndexedDB và Web Crypto), rồi `npm run build`. Test HTTP dùng transport giả để kiểm tra frontend; chưa thay cho kiểm thử API thật.
 
 ## Tài liệu
 

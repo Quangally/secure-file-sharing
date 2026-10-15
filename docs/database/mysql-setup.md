@@ -38,11 +38,30 @@ MYSQL_DATABASE/USER/PASSWORD/ROOT_PASSWORD chỉ khởi tạo tài khoản/datab
 
 Backend bộ khung chạy trên máy, nên URL dùng 127.0.0.1. Nếu sau này đưa backend vào cùng Compose, host sẽ là db, port 3306.
 
-## Kết nối backend theo kế hoạch
+## Tạo bảng — chọn một cách
 
-`backend/requirements.txt` đã có PyMySQL[rsa] thay driver cũ. TV4 xây SQLAlchemy engine/session và Alembic migration ở tuần 2–4; đọc DATABASE_URL từ môi trường (nếu muốn tự nạp .env, bổ sung loader phù hợp). FastAPI /health hiện chỉ kiểm tra API, chưa kiểm tra kết nối MySQL.
+**Dùng Workbench:** mở và chạy toàn bộ `database/01_schema.sql`. Đây là một file chính tạo database + 6 bảng, không kèm dữ liệu mẫu, không DROP. Không cần chạy các SQL ví dụ. Refresh SCHEMAS để xem bảng.
 
-Không commit .env. File .env.example chỉ chứa placeholder. Chưa có bảng nghiệp vụ hay dữ liệu cần chuyển đổi ở bộ khung này.
+**Dùng migration trong dự án:** tạo database rỗng trước bằng Workbench hoặc Docker. Cài `backend/requirements.txt`, nạp DATABASE_URL vào môi trường rồi chạy từ thư mục gốc:
+
+```powershell
+# Ví dụ PowerShell: nhập URL local của bạn, không commit mật khẩu.
+$env:DATABASE_URL = Read-Host 'DATABASE_URL'
+python -m alembic -c backend/alembic.ini upgrade head
+python -m alembic -c backend/alembic.ini current
+```
+
+Tạo `.env` không đồng nghĩa Alembic tự đọc file đó. Lệnh trên đọc biến môi trường; Phúc có thể dùng loader của backend sau. Alembic không tự CREATE DATABASE hoặc đổi sang tên database khác; nó chạy trong database đã chỉ định ở URL. Cần quyền DDL cho tài khoản chạy migration, tài khoản ứng dụng thường chỉ cần DML. Không dùng cả hai cách tạo bảng lần lượt trên cùng database.
+
+Nếu đã chạy SQL trước, migration sẽ dừng khi phát hiện bảng tồn tại. Chỉ dùng `alembic stamp 0001_secure_share` sau khi đã đối chiếu tất cả cột, index, FK và CHECK với SQL v1; stamp chỉ ghi phiên bản, không sửa cấu trúc. Không stamp mù để bỏ lỗi. Không DROP database hoặc tắt FOREIGN_KEY_CHECKS để né lỗi.
+
+`database/01_schema.sql` là định nghĩa khởi tạo v1 bất biến. Các thay đổi sau cần revision mới, không sửa ngược nội dung v1 khi đã được nhóm áp dụng. MySQL DDL có implicit commit; nếu migration dừng giữa chừng cần xem bảng đã tạo, không cho rằng ROLLBACK xóa toàn bộ DDL. `alembic downgrade base` xóa các bảng và dữ liệu; không phải lệnh setup thông thường.
+
+## Kết nối backend
+
+`backend/app/database/session.py` cung cấp get_engine() và session_scope(), đọc DATABASE_URL khi cần. Connection đặt UTC và strict mode; không tạo bảng tự động khi start API. Phúc/Vũ dùng session_scope cho giao dịch hoặc dùng engine này trong lớp ORM của mình. Không có thay đổi endpoint nghiệp vụ trong phần Quang.
+
+FastAPI /health chỉ kiểm tra API, chưa kiểm tra MySQL. Xem `docs/api/contract.md` và `docs/quang/README.md` để ghép các phần. Không commit .env. File .env.example chỉ chứa placeholder.
 
 Nguồn:
 - https://docs.sqlalchemy.org/en/20/dialects/mysql.html#module-sqlalchemy.dialects.mysql.pymysql
