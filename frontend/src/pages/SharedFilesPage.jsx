@@ -30,8 +30,13 @@ export default function SharedFilesPage({ api, profile, manager, onAuthRequired 
       const link = document.createElement("a");
       link.href = url;
       link.download = result.filename;
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 0);
+      setTimeout(() => {
+        link.remove();
+        URL.revokeObjectURL(url);
+      }, 1000);
     } catch (reason) {
       setMessage(errorMessage(reason));
       if (reason.status === 401) onAuthRequired?.();

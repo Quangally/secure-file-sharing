@@ -130,6 +130,38 @@ describe("protocol v1", () => {
       }).readMetadata(envelope, { userId }),
     ).rejects.toThrow("missing");
   });
+  it("verifies a recipient public key fingerprint before wrapping", async () => {
+    const { envelope } = await uploaded();
+    const recipient = await generateKeyPair();
+    const recipientJwk = await exportPublicKey(recipient.publicKey);
+    const fingerprint = await sha256Hex(
+      await crypto.subtle.exportKey("spki", recipient.publicKey),
+    );
+    await expect(
+      fileCrypto.prepareShare(
+        envelope,
+        {
+          key_id: crypto.randomUUID(),
+          public_key_jwk: recipientJwk,
+          fingerprint_sha256: fingerprint,
+        },
+        { userId },
+      ),
+    ).resolves.toMatchObject({
+      verified_fingerprint_sha256: fingerprint,
+    });
+    await expect(
+      fileCrypto.prepareShare(
+        envelope,
+        {
+          key_id: crypto.randomUUID(),
+          public_key_jwk: recipientJwk,
+          fingerprint_sha256: "0".repeat(64),
+        },
+        { userId },
+      ),
+    ).rejects.toMatchObject({ code: "KEY_CHANGED" });
+  });
   it("refuses oversized files, changed own key, malformed encoding and protocol", async () => {
     await expect(
       fileCrypto.prepareUpload({ size: MAX_FILE_BYTES + 1 }, { profile }),
