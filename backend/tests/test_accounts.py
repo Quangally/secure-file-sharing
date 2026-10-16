@@ -110,6 +110,23 @@ def test_lookup_and_key_registration(client):
     assert http.post("/me/keys", headers={"X-CSRF-Token": csrf}, json={"public_key_jwk": jwk}).status_code == 409
 
 
+def test_key_registration_requires_wrap_key(client):
+    http, engine = client
+    profile = register(http)
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048).public_key().public_numbers()
+    encode = lambda value: base64.urlsafe_b64encode(value.to_bytes((value.bit_length() + 7) // 8, "big")).decode().rstrip("=")
+    jwk = {"kty": "RSA", "n": encode(key.n), "e": encode(key.e),
+           "alg": "RSA-OAEP-256", "key_ops": ["encrypt"], "ext": True}
+    headers = {"X-CSRF-Token": profile["csrf_token"]}
+    rejected = http.post("/me/keys", headers=headers, json={"public_key_jwk": jwk})
+    assert rejected.status_code == 422
+    with engine.connect() as connection:
+        assert connection.execute(text("SELECT COUNT(*) FROM public_keys")).scalar_one() == 0
+    accepted = http.post("/me/keys", headers=headers, json={
+        "public_key_jwk": {**jwk, "key_ops": ["wrapKey"]}})
+    assert accepted.status_code == 201, accepted.text
+
+
 def test_expired_session_and_disabled_user(client):
     http, engine = client
     profile = register(http)

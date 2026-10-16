@@ -308,8 +308,8 @@ def validate_public_jwk(jwk: dict):
         raise HTTPException(422, "Public JWK chứa trường không được phép.")
     if jwk.get("kty") != "RSA" or jwk.get("alg") not in (None, "RSA-OAEP-256"):
         raise HTTPException(422, "Yêu cầu RSA-OAEP-256 public key.")
-    if jwk.get("key_ops") not in (["encrypt", "wrapKey"], ["wrapKey", "encrypt"], ["wrapKey"], ["encrypt"]):
-        raise HTTPException(422, "Public key chỉ được encrypt/wrapKey.")
+    if jwk.get("key_ops") not in (["encrypt", "wrapKey"], ["wrapKey", "encrypt"], ["wrapKey"]):
+        raise HTTPException(422, "Public key cần quyền wrapKey để bọc khóa AES.")
     if jwk.get("ext") is not True:
         raise HTTPException(422, "Public key phải cho phép export.")
     try:
