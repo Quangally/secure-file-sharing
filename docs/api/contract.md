@@ -1,6 +1,6 @@
 # Hợp đồng tích hợp đề xuất
 
-Đây là contract v1 mà trang kho tệp của Quang đang gọi; Phúc/Vũ cần triển khai endpoint tương ứng. Repo hiện chỉ có backend GET /health. IDs là UUID chữ thường. Thời gian API dùng ISO 8601 có Z; SQL dùng DATETIME(6) UTC. Khi dùng SQLAlchemy, chuyển datetime có timezone về UTC trước khi ghi và gắn timezone UTC khi serialize.
+Đây là contract v1 mà trang kho tệp của Quang đang gọi. API tài khoản đã triển khai; API tệp/chia sẻ còn cần triển khai. IDs là UUID chữ thường. Thời gian API dùng ISO 8601 có Z; SQL dùng DATETIME(6) UTC. Khi dùng SQLAlchemy, chuyển datetime có timezone về UTC trước khi ghi và gắn timezone UTC khi serialize.
 
 ## Phiên đăng nhập và phản hồi tài khoản
 
@@ -32,6 +32,8 @@ Local Vite proxy /api → localhost:8000 để dùng cùng origin; production c�
 | Đăng nhập | POST /auth/login | users, auth_sessions; Phúc + An |
 | Đăng xuất | POST /auth/logout | revoke session; Phúc + An |
 | Tên user / Cài đặt | GET /me | users + thông tin public key hiện tại; Phúc + Bắc |
+| Sửa tên hiển thị | PATCH /me | users; yêu cầu X-CSRF-Token |
+| Đổi mật khẩu | POST /me/password | users + thu hồi các phiên khác; yêu cầu X-CSRF-Token |
 | Đăng ký public key | POST /me/keys | public_keys; Bắc + Phúc |
 | Tệp của tôi | GET /files | my_files; Vũ + Quang + helper Bắc |
 | Upload | POST /files | ciphertext + manifest + owner envelope; Vũ + Bắc + Quang |
