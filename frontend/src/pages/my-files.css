@@ -54,6 +54,9 @@ p {
   border-bottom: 1px solid #e9edf2;
   gap: 20px;
 }
+.ss-global-notice {
+  margin: 16px 5.5% 0;
+}
 .ss-brand {
   display: flex;
   align-items: center;

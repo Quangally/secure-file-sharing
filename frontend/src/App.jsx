@@ -25,6 +25,8 @@ export default function App() {
     [loading, setLoading] = useState(true);
   const [view, setView] = useState("files");
   const [shareFile, setShareFile] = useState(null);
+  const [logoutBusy, setLogoutBusy] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const authRequired = useCallback(() => {
     api.setCsrfToken("");
     setProfile(null);
@@ -49,14 +51,17 @@ export default function App() {
     return () => controller.abort();
   }, [attempt]);
   async function logout() {
+    setLogoutBusy(true);
+    setLogoutError("");
     try {
       await api.logout();
-    } catch (reason) {
-      setError(errorMessage(reason));
-    } finally {
       api.setCsrfToken("");
       setProfile(null);
       setView("files");
+    } catch (reason) {
+      setLogoutError(errorMessage(reason));
+    } finally {
+      setLogoutBusy(false);
     }
   }
   function authenticated(result) {
@@ -76,10 +81,13 @@ export default function App() {
               {profile.full_name.trim().charAt(0)}
             </span>
             <strong>{profile.full_name}</strong>
-            <button className="ss-text-button" type="button" onClick={logout}>Đăng xuất</button>
+            <button className="ss-text-button" type="button" disabled={logoutBusy} onClick={logout}>
+              {logoutBusy ? "Đang đăng xuất…" : "Đăng xuất"}
+            </button>
           </div>
         )}
       </header>
+      {logoutError && profile && <div className="ss-global-notice ss-notice error" role="alert">{logoutError}</div>}
       <div className="ss-layout">
         <aside className="ss-sidebar" aria-label="Điều hướng">
           <p>KHÔNG GIAN CỦA BẠN</p>

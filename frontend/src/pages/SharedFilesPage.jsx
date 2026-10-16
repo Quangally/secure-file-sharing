@@ -10,7 +10,7 @@ export default function SharedFilesPage({ api, profile, manager, onAuthRequired 
   useEffect(() => {
     const controller = new AbortController();
     setState("loading");
-    api.sharedWithMe({ signal: controller.signal }).then((result) => {
+    manager.listShared(profile, { signal: controller.signal }).then((result) => {
       setItems(result?.items || []);
       setState("ready");
     }).catch((reason) => {
@@ -20,7 +20,7 @@ export default function SharedFilesPage({ api, profile, manager, onAuthRequired 
       if (reason.status === 401) onAuthRequired?.();
     });
     return () => controller.abort();
-  }, [api, onAuthRequired]);
+  }, [manager, profile, onAuthRequired]);
   async function download(item) {
     setBusy(true);
     setMessage("");
