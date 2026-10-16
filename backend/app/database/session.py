@@ -31,3 +31,9 @@ def session_scope():
     with Session(get_engine()) as session:
         with session.begin():
             yield session
+
+
+def get_session():
+    """Request-scoped session; routes own their transaction boundaries."""
+    with Session(get_engine()) as session:
+        yield session

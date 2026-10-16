@@ -4,7 +4,7 @@
 
 ## Trạng thái
 
-Đã có phần Quang: schema MySQL 6 bảng, Alembic migration, connection factory SQLAlchemy, giao diện kho tệp theo mẫu An, upload/download/xóa, adapter API và kiểm thử. Mã hóa chạy phía client qua Web Crypto; danh sách đọc metadata đã mã hóa. Backend hiện chỉ có /health; các API tài khoản/tệp của Phúc/Vũ và luồng tạo key của Bắc vẫn cần ghép. Chạy repo lúc này có thể báo chưa kết nối tài khoản/API; ứng dụng không tự tạo dữ liệu giả để báo thành công.
+Đã có schema MySQL 6 bảng, Alembic migration, connection factory SQLAlchemy, backend tài khoản (đăng ký, đăng nhập, session, hồ sơ, tra người nhận, public key), giao diện kho tệp, adapter API và kiểm thử. Mã hóa chạy phía client qua Web Crypto. Backend API tệp/chia sẻ và luồng tạo khóa trên thiết bị vẫn cần ghép; các trang tệp có thể báo API chưa sẵn sàng.
 
 Xem **[Bàn giao phần Quang](docs/quang/README.md)** để setup, nhúng trang vào frontend An và xem các phụ thuộc còn lại.
 
@@ -40,7 +40,7 @@ npm ci
 npm run dev
 ```
 
-Backend (terminal khác, Windows PowerShell):
+Backend (terminal khác, Windows PowerShell; đặt `DATABASE_URL` theo [hướng dẫn MySQL](docs/database/mysql-setup.md) trước khi gọi API tài khoản):
 
 ```powershell
 cd backend
@@ -51,9 +51,9 @@ py -m venv .venv
 
 Linux/macOS: dùng `python3 -m venv .venv`, sau đó `.venv/bin/python -m pip install -r requirements.txt` và `.venv/bin/python -m uvicorn app.main:app --reload`.
 
-Frontend: http://localhost:5173. API: http://localhost:8000/health. Swagger: http://localhost:8000/docs.
+Frontend: http://localhost:5173. API: http://localhost:8000/health. Swagger: http://localhost:8000/docs. Vite chuyển `/api` tới backend; đăng ký/đăng nhập tự tạo cookie HttpOnly và frontend gọi `/me` để nhận CSRF token.
 
-Database: xem [hướng dẫn MySQL](docs/database/mysql-setup.md). Nếu đã cài MySQL Server 8.4, chạy **database/01_schema.sql** trong Workbench là tạo đủ 6 bảng. Hoặc dùng Docker và Alembic theo hướng dẫn; chọn một cách tạo bảng. Backend /health hiện chưa truy vấn database.
+Database: xem [hướng dẫn MySQL](docs/database/mysql-setup.md). Nếu đã cài MySQL Server 8.4, chạy **database/01_schema.sql** trong Workbench là tạo đủ 6 bảng. Hoặc dùng Docker và Alembic theo hướng dẫn; chọn một cách tạo bảng. Backend /health không truy vấn database.
 
 ## Kiểm tra
 
