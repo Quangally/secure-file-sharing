@@ -54,6 +54,9 @@ p {
   border-bottom: 1px solid #e9edf2;
   gap: 20px;
 }
+.ss-global-notice {
+  margin: 16px 5.5% 0;
+}
 .ss-brand {
   display: flex;
   align-items: center;
@@ -113,6 +116,23 @@ p {
   padding: 17px 18px;
   font-size: 17px;
   font-weight: 750;
+}
+.ss-nav-button {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: #315d7e;
+  text-align: left;
+  border-radius: 9px;
+  padding: 15px 18px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.ss-nav-button:hover,
+.ss-nav-button.active {
+  background: #edf4ff;
+  color: #1965b5;
 }
 .ss-sidebar-note {
   margin: 36px 18px 0;
@@ -516,6 +536,138 @@ p {
 .ss-connection > button {
   margin-top: 10px;
 }
+.ss-auth-wrap {
+  min-height: calc(100vh - 82px);
+  display: grid;
+  place-items: center;
+  padding: 36px 20px;
+}
+.ss-auth-card {
+  width: min(450px, 100%);
+  background: #fff;
+  border: 1px solid #e9edf1;
+  border-radius: 18px;
+  padding: 34px;
+  box-shadow: 0 2px 12px #213c5810;
+}
+.ss-auth-card h1 {
+  font-size: 32px;
+}
+.ss-auth-card .ss-subtitle {
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+.ss-form,
+.ss-share-form {
+  display: grid;
+  gap: 16px;
+}
+.ss-form label,
+.ss-share-form label {
+  display: grid;
+  gap: 7px;
+  color: #315d7e;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ss-form input,
+.ss-share-form input {
+  width: 100%;
+  border: 1px solid #d9e3eb;
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: #24455d;
+  background: #fff;
+}
+.ss-form input:focus,
+.ss-share-form input:focus,
+.ss-share-dialog input:focus {
+  outline: 0;
+  border-color: #5c9ce5;
+  box-shadow: 0 0 0 3px #87b6ff44;
+}
+.ss-auth-submit {
+  width: 100%;
+  margin-top: 5px;
+}
+.ss-auth-switch {
+  display: block;
+  margin: 17px auto 0;
+}
+.ss-settings-card {
+  margin-top: 30px;
+  width: min(650px, 100%);
+  background: #fff;
+  border: 1px solid #e9edf1;
+  border-radius: 14px;
+  padding: 25px;
+  line-height: 1.8;
+}
+.ss-settings-card h2 {
+  margin-bottom: 3px;
+}
+.ss-settings-card p {
+  color: #738799;
+}
+.ss-settings-card hr {
+  border: 0;
+  border-top: 1px solid #edf1f5;
+  margin: 20px 0;
+}
+.ss-fingerprint {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}
+.ss-share-dialog {
+  width: min(570px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  overflow: auto;
+}
+.ss-share-dialog h2 {
+  margin-bottom: 8px;
+}
+.ss-share-form {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  margin: 22px 0;
+}
+.ss-recipient {
+  display: grid;
+  gap: 5px;
+  padding: 15px;
+  border: 1px solid #d5e6f7;
+  border-radius: 10px;
+  background: #f5f9ff;
+  margin-bottom: 24px;
+}
+.ss-recipient span,
+.ss-recipient small,
+.ss-muted {
+  color: #738799;
+}
+.ss-recipient small {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}
+.ss-recipient .ss-button {
+  justify-self: start;
+  margin-top: 8px;
+}
+.ss-share-list-heading {
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+.ss-share-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #edf1f5;
+  padding: 11px 0;
+  color: #315d7e;
+}
+.ss-file-panel.ss-file-list {
+  overflow: hidden;
+}
 @media (min-width: 1600px) {
   .ss-page {
     padding-top: 62px;
@@ -696,6 +848,16 @@ p {
   }
   .ss-connection > p {
     font-size: 14px;
+  }
+  .ss-auth-wrap {
+    min-height: calc(100vh - 68px);
+    padding: 22px 17px;
+  }
+  .ss-auth-card {
+    padding: 25px 20px;
+  }
+  .ss-share-form {
+    grid-template-columns: 1fr;
   }
 }
 @media (prefers-reduced-motion: reduce) {

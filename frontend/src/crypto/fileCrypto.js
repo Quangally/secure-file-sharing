@@ -98,13 +98,13 @@ function validateEnvelope(value) {
 }
 
 export function createFileCrypto({ getKeyPair }) {
-  async function open(value, { userId, signal }) {
+  async function open(value, { userId, signal, extractable = false }) {
     abortIfNeeded(signal);
     const encoded = validateEnvelope(value);
     const pair = await getKeyPair(userId, value.key_id, { signal });
     let key, metadata;
     try {
-      key = await unwrapAesKey(encoded.wrapped, pair.privateKey);
+      key = await unwrapAesKey(encoded.wrapped, pair.privateKey, extractable);
       const plain = await decryptBytes(
         encoded.metadata,
         key,
@@ -223,6 +223,48 @@ export function createFileCrypto({ getKeyPair }) {
         ciphertext: new Blob([payload.ciphertext], {
           type: "application/octet-stream",
         }),
+      };
+    },
+    async prepareShare(envelope, recipientKey, { userId, signal } = {}) {
+      abortIfNeeded(signal);
+      if (!recipientKey?.public_key_jwk)
+        throw new FileError(
+          "KEY_MISSING",
+          "Người nhận chưa đăng ký khóa mã hóa.",
+        );
+      const opened = await open(envelope, {
+        userId,
+        signal,
+        extractable: true,
+      });
+      const publicKey = await importPublicKey(recipientKey.public_key_jwk);
+      if (
+        publicKey.algorithm.modulusLength !== 2048 ||
+        toBase64(publicKey.algorithm.publicExponent) !== "AQAB"
+      )
+        throw new FileError(
+          "KEY_INVALID",
+          "Public key người nhận phải là RSA 2048 với exponent 65537.",
+        );
+      if (!/^[0-9a-f]{64}$/.test(recipientKey.fingerprint_sha256 || ""))
+        throw new FileError(
+          "KEY_INVALID",
+          "Fingerprint public key người nhận không hợp lệ.",
+        );
+      const fingerprint = await sha256Hex(
+        await crypto.subtle.exportKey("spki", publicKey),
+      );
+      if (fingerprint !== recipientKey.fingerprint_sha256)
+        throw new FileError(
+          "KEY_CHANGED",
+          "Public key người nhận không khớp fingerprint từ máy chủ.",
+        );
+      const wrapped = await wrapAesKey(opened.key, publicKey);
+      abortIfNeeded(signal);
+      return {
+        key_id: recipientKey.key_id,
+        verified_fingerprint_sha256: fingerprint,
+        wrapped_aes_key_base64: toBase64(wrapped),
       };
     },
     async restoreDownload(value, bytes, options) {

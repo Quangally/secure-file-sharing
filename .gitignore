@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .venv/
+backend/File_Secure/
 __pycache__/
 *.py[cod]
 .pytest_cache/

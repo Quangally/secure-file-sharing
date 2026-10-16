@@ -39,6 +39,13 @@ it("runs me → encrypt/multipart upload → list/decrypt metadata → download/
         page: 1,
         page_size: 20,
       });
+    if (url === "/api/files/shared-with-me")
+      return json({
+        items: deleted ? [] : [record],
+        total: deleted ? 0 : 1,
+        page: 1,
+        page_size: 20,
+      });
     if (url.endsWith("/envelope")) return json(record);
     if (url.endsWith("/content")) return new Response(bytes);
     if (options.method === "DELETE") {
@@ -95,6 +102,8 @@ it("runs me → encrypt/multipart upload → list/decrypt metadata → download/
   );
   const list = await manager.list(current);
   expect(list.items[0].name).toBe("secret-file.txt");
+  const shared = await manager.listShared(current);
+  expect(shared.items[0].name).toBe("secret-file.txt");
   const output = await manager.download(record.id, current);
   expect(await output.blob.text()).toBe("bytes of a private document");
   await manager.remove(record.id);

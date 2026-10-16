@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import MyFilesPage from "./pages/MyFilesPage.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
+import SharedFilesPage from "./pages/SharedFilesPage.jsx";
+import ShareDialog from "./components/ShareDialog.jsx";
 import { createFileApi } from "./services/fileApi.js";
 import { createFileManager } from "./services/fileManager.js";
 import { createDeviceKeyProvider } from "./services/keyStore.js";
@@ -20,6 +23,10 @@ export default function App() {
     [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0),
     [loading, setLoading] = useState(true);
+  const [view, setView] = useState("files");
+  const [shareFile, setShareFile] = useState(null);
+  const [logoutBusy, setLogoutBusy] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const authRequired = useCallback(() => {
     api.setCsrfToken("");
     setProfile(null);
@@ -43,6 +50,25 @@ export default function App() {
       });
     return () => controller.abort();
   }, [attempt]);
+  async function logout() {
+    setLogoutBusy(true);
+    setLogoutError("");
+    try {
+      await api.logout();
+      api.setCsrfToken("");
+      setProfile(null);
+      setView("files");
+    } catch (reason) {
+      setLogoutError(errorMessage(reason));
+    } finally {
+      setLogoutBusy(false);
+    }
+  }
+  function authenticated(result) {
+    setError("");
+    setProfile(result);
+    setAttempt((value) => value + 1);
+  }
   return (
     <div className="ss-app">
       <header className="ss-topbar">
@@ -55,15 +81,19 @@ export default function App() {
               {profile.full_name.trim().charAt(0)}
             </span>
             <strong>{profile.full_name}</strong>
+            <button className="ss-text-button" type="button" disabled={logoutBusy} onClick={logout}>
+              {logoutBusy ? "Đang đăng xuất…" : "Đăng xuất"}
+            </button>
           </div>
         )}
       </header>
+      {logoutError && profile && <div className="ss-global-notice ss-notice error" role="alert">{logoutError}</div>}
       <div className="ss-layout">
         <aside className="ss-sidebar" aria-label="Điều hướng">
           <p>KHÔNG GIAN CỦA BẠN</p>
-          <div className="ss-nav-active" aria-current="page">
-            ▣ Tệp của tôi
-          </div>
+          {profile && <button className={`ss-nav-button ${view === "files" ? "active" : ""}`} aria-current={view === "files" ? "page" : undefined} onClick={() => setView("files")}>▣ Tệp của tôi</button>}
+          {profile && <button className={`ss-nav-button ${view === "shared" ? "active" : ""}`} aria-current={view === "shared" ? "page" : undefined} onClick={() => setView("shared")}>↗ Được chia sẻ</button>}
+          {profile && <button className={`ss-nav-button ${view === "settings" ? "active" : ""}`} aria-current={view === "settings" ? "page" : undefined} onClick={() => setView("settings")}>⚙ Cài đặt</button>}
           <p className="ss-sidebar-note">
             Kho tệp cá nhân
             <br />
@@ -71,34 +101,36 @@ export default function App() {
           </p>
         </aside>
         <main className="ss-main">
-          {profile ? (
+          {profile ? view === "files" ? (
             <MyFilesPage
               key={profile.id}
               profile={profile}
               manager={manager}
               onAuthRequired={authRequired}
+              onShare={setShareFile}
             />
+          ) : view === "shared" ? (
+            <SharedFilesPage api={api} profile={profile} manager={manager} onAuthRequired={authRequired} />
           ) : (
-            <div className="ss-connection">
-              <p className="ss-eyebrow">SECURE SHARE</p>
-              <h1>
-                {loading ? "Đang mở kho tệp…" : "Kết nối tài khoản của bạn"}
-              </h1>
-              <p role={error ? "alert" : "status"}>
-                {error || "Đang kiểm tra phiên đăng nhập."}
-              </p>
-              {!loading && (
-                <button
-                  className="ss-button primary"
-                  onClick={() => setAttempt((value) => value + 1)}
-                >
-                  Kết nối lại
-                </button>
-              )}
+            <div className="ss-page">
+              <p className="ss-eyebrow">TÀI KHOẢN</p>
+              <h1>Cài đặt</h1>
+              <p className="ss-subtitle">Thông tin phiên đăng nhập và khóa mã hóa trên thiết bị.</p>
+              <section className="ss-settings-card">
+                <h2>{profile.full_name}</h2>
+                <p>{profile.email}</p>
+                <hr />
+                <h3>Khóa mã hóa hiện tại</h3>
+                {profile.current_key ? <p className="ss-fingerprint">{profile.current_key.fingerprint_sha256}</p> : <p>Chưa đăng ký khóa trên thiết bị.</p>}
+              </section>
             </div>
+          ) : (
+            loading ? <div className="ss-connection"><p className="ss-eyebrow">SECURE SHARE</p><h1>Đang mở kho tệp…</h1><p role="status">Đang kiểm tra phiên đăng nhập.</p></div> :
+              <AuthPage api={api} onAuthenticated={authenticated} initialError={error} />
           )}
         </main>
       </div>
+      {shareFile && profile && <ShareDialog api={api} manager={manager} profile={profile} file={shareFile} onClose={() => setShareFile(null)} onChanged={() => setAttempt((value) => value + 1)} />}
     </div>
   );
 }
