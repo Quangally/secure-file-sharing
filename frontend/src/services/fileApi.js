@@ -27,7 +27,14 @@ export function createFileApi({
   }
   async function request(
     path,
-    { signal, method = "GET", responseType = "json", onProgress } = {},
+    {
+      signal,
+      method = "GET",
+      responseType = "json",
+      onProgress,
+      csrf = method !== "GET",
+      body,
+    } = {},
   ) {
     abortIfNeeded(signal);
     const controller = new AbortController();
@@ -44,12 +51,14 @@ export function createFileApi({
         credentials: "include",
         signal: controller.signal,
         redirect: "error",
+        body,
         headers: {
           Accept:
             responseType === "binary"
               ? "application/octet-stream"
               : "application/json",
-          ...(method === "GET" ? {} : mutationHeaders()),
+          ...(body ? { "Content-Type": "application/json" } : {}),
+          ...(csrf ? mutationHeaders() : {}),
         },
       });
       if (!response.ok) throw httpError(response.status);
@@ -147,6 +156,54 @@ export function createFileApi({
       csrfToken =
         typeof profile.csrf_token === "string" ? profile.csrf_token : "";
       return profile;
+    },
+    register(payload, options = {}) {
+      return request("/auth/register", {
+        ...options,
+        method: "POST",
+        csrf: false,
+        body: JSON.stringify(payload),
+      });
+    },
+    login(payload, options = {}) {
+      return request("/auth/login", {
+        ...options,
+        method: "POST",
+        csrf: false,
+        body: JSON.stringify(payload),
+      });
+    },
+    logout(options = {}) {
+      return request("/auth/logout", { ...options, method: "POST" });
+    },
+    lookupRecipient(email, options = {}) {
+      return request(`/users/lookup?email=${encodeURIComponent(email)}`, options);
+    },
+    sharedWithMe(options = {}) {
+      return request("/files/shared-with-me", options);
+    },
+    listShares(id, options = {}) {
+      return request(`/files/${validId(id)}/shares`, options);
+    },
+    share(id, payload, options = {}) {
+      return request(`/files/${validId(id)}/shares`, {
+        ...options,
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    },
+    revokeShare(id, userId, options = {}) {
+      return request(`/files/${validId(id)}/shares/${validId(userId)}`, {
+        ...options,
+        method: "DELETE",
+      });
+    },
+    registerKey(payload, options = {}) {
+      return request("/me/keys", {
+        ...options,
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
     },
     async list({ page = 1, pageSize = 20, signal } = {}) {
       const result = await request(

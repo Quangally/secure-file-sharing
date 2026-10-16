@@ -225,6 +225,23 @@ export function createFileCrypto({ getKeyPair }) {
         }),
       };
     },
+    async prepareShare(envelope, recipientKey, { userId, signal } = {}) {
+      abortIfNeeded(signal);
+      if (!recipientKey?.public_key_jwk)
+        throw new FileError(
+          "KEY_MISSING",
+          "Người nhận chưa đăng ký khóa mã hóa.",
+        );
+      const opened = await open(envelope, { userId, signal });
+      const publicKey = await importPublicKey(recipientKey.public_key_jwk);
+      const wrapped = await wrapAesKey(opened.key, publicKey);
+      abortIfNeeded(signal);
+      return {
+        key_id: recipientKey.key_id,
+        verified_fingerprint_sha256: recipientKey.fingerprint_sha256,
+        wrapped_aes_key_base64: toBase64(wrapped),
+      };
+    },
     async restoreDownload(value, bytes, options) {
       const opened = await open(value, options);
       if (

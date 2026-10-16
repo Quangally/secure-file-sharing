@@ -95,5 +95,16 @@ export function createFileManager({ api, fileCrypto }) {
     remove(id, options) {
       return api.remove(id, options);
     },
+    async share(file, recipient, profile, options = {}) {
+      const envelope = await api.envelope(file.id, options);
+      const payload = await fileCrypto.prepareShare(envelope, recipient.current_key, {
+        userId: profile.id,
+        signal: options.signal,
+      });
+      return api.share(file.id, {
+        recipient_user_id: recipient.id,
+        ...payload,
+      }, options);
+    },
   };
 }
