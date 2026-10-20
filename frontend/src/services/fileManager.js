@@ -1,6 +1,6 @@
 import { abortIfNeeded, FileError } from "./errors.js";
 
-export function createFileManager({ api, fileCrypto }) {
+export function createFileManager({ api, fileCrypto, requireTrusted }) {
   async function decryptListing(result, profile, options = {}) {
     // Metadata stays encrypted in both owner and shared-file listings.
     const items = new Array(result.items.length);
@@ -106,7 +106,10 @@ export function createFileManager({ api, fileCrypto }) {
       return api.remove(id, options);
     },
     async share(file, recipient, profile, options = {}) {
+      if (!requireTrusted) throw new FileError("KEY_UNVERIFIED", "Chưa kết nối bộ xác minh khóa người nhận.");
+      await requireTrusted(profile.id, recipient);
       const envelope = await api.envelope(file.id, options);
+      if (envelope?.id !== file.id) throw new FileError("BAD_RESPONSE", "Máy chủ trả nhầm mã tệp.");
       const payload = await fileCrypto.prepareShare(envelope, recipient.current_key, {
         userId: profile.id,
         signal: options.signal,

@@ -8,12 +8,16 @@ import { createFileManager } from "./services/fileManager.js";
 import { createDeviceKeyProvider } from "./services/keyStore.js";
 import { createFileCrypto } from "./crypto/fileCrypto.js";
 import { errorMessage } from "./services/errors.js";
+import { createKeyManager } from "./crypto/keyManager.js";
+import DeviceKeys from "./components/DeviceKeys.jsx";
 
 const api = createFileApi({
   baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
 });
+const keys = createKeyManager({ api });
 const manager = createFileManager({
   api,
+  requireTrusted: keys.requireTrusted,
   fileCrypto: createFileCrypto({ getKeyPair: createDeviceKeyProvider() }),
 });
 
@@ -30,6 +34,7 @@ export default function App() {
   const authRequired = useCallback(() => {
     api.setCsrfToken("");
     setProfile(null);
+    setShareFile(null);
     setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
   }, []);
   useEffect(() => {
@@ -57,6 +62,7 @@ export default function App() {
       await api.logout();
       api.setCsrfToken("");
       setProfile(null);
+      setShareFile(null);
       setView("files");
     } catch (reason) {
       setLogoutError(errorMessage(reason));
@@ -101,6 +107,7 @@ export default function App() {
           </p>
         </aside>
         <main className="ss-main">
+          {profile && <DeviceKeys key={profile.id} profile={profile} keys={keys} onReady={(updated) => setProfile((current) => current?.id === updated.id ? updated : current)} onAuthRequired={authRequired} />}
           {profile ? view === "files" ? (
             <MyFilesPage
               key={profile.id}
@@ -130,7 +137,7 @@ export default function App() {
           )}
         </main>
       </div>
-      {shareFile && profile && <ShareDialog api={api} manager={manager} profile={profile} file={shareFile} onClose={() => setShareFile(null)} onChanged={() => setAttempt((value) => value + 1)} />}
+      {shareFile && profile && <ShareDialog api={api} manager={manager} keys={keys} profile={profile} file={shareFile} onClose={() => setShareFile(null)} onChanged={() => setAttempt((value) => value + 1)} />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { FileError, abortIfNeeded } from "./errors.js";
 
-// Read-only integration boundary. Bac owns creating/importing/storing the keys.
+// Read-only integration boundary; crypto/keyManager.js owns key creation/storage.
 // Record: {userId, keyId, privateKey: CryptoKey, publicKey: CryptoKey}.
 export function createDeviceKeyProvider({
   indexedDBImpl = globalThis.indexedDB,

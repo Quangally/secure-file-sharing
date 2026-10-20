@@ -1,8 +1,12 @@
 # Module crypto — TV2
 
-AES/RSA/SHA là primitive mẫu đã có kiểm thử, chưa ghép vào UI/API. Web Crypto yêu cầu môi trường trình duyệt phù hợp (HTTPS hoặc localhost).
+AES/RSA/SHA được dùng bởi `fileCrypto.js` trong luồng upload/download/share. Web Crypto yêu cầu HTTPS hoặc localhost.
 
-Tuần 3–6: thêm keyManager.js (IndexedDB, khóa riêng non-extractable), fileCrypto.js (đóng gói tên gốc + dữ liệu trong payload mã hóa), encoding base64 và fingerprint SHA-256 của public key SPKI. Xác minh fingerprint qua kênh độc lập trước lần chia sẻ đầu; pin khóa và cảnh báo đổi khóa.
+`keyManager.js` tạo và lưu cặp CryptoKey trong IndexedDB, đăng ký public JWK qua API tài khoản, kiểm tra khóa khi mở ứng dụng và phục hồi đăng ký khi mất phản hồi. `DeviceKeys` cung cấp nút tạo khóa và hướng dẫn giới hạn một thiết bị. Private key non-extractable không được xuất hoặc gửi đi.
+
+`fileCrypto.js` mã hóa riêng nội dung và metadata bằng cùng AES key, hai IV khác nhau, AAD gắn UUID và loại payload. `ShareDialog` yêu cầu nhập fingerprint nhận qua kênh độc lập; key manager pin fingerprint theo tài khoản/người nhận và yêu cầu xác minh lại khi thay đổi. `fileManager.share` kiểm tra pin trước khi mở owner envelope.
+
+Xem [bàn giao phần Bắc](../../../docs/bac/README.md) cho giao diện tích hợp, phục hồi lỗi và checklist nghiệm thu.
 
 Thực hiện wrap cho chính chủ ngay khi upload; dùng owner envelope để chia sẻ sau. AES key extractable chỉ dùng để wrap trong RAM, không lưu raw key. API mẫu unwrap mặc định non-extractable cho người nhận. Không gửi CryptoKey hoặc khóa raw đến backend.
 
