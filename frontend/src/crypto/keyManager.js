@@ -62,21 +62,31 @@ export function createKeyManager({ api, indexedDBImpl = globalThis.indexedDB } =
     catch (error) {
       if (error.code !== "KEY_MISSING") throw error;
       const pending = await read(profile.id, "pending");
-      if (!pending || await publicFingerprint(pending.publicKey) !== remote.fingerprint_sha256) throw error;
-      await transaction("readwrite", (store) => {
-        store.put({ ...pending, keyId: remote.key_id });
-        store.delete([profile.id, "pending"]);
-      });
+      if (pending && await publicFingerprint(pending.publicKey) === remote.fingerprint_sha256) {
+        await transaction("readwrite", (store) => {
+          // Another tab may already have finalized this key. Never overwrite a
+          // stored private key with a stale pending snapshot.
+          store.get([profile.id, remote.key_id]).onsuccess = (event) => {
+            if (!event.target.result) {
+              store.add({ ...pending, keyId: remote.key_id });
+              store.delete([profile.id, "pending"]);
+            }
+          };
+        });
+      }
+      // Promotion and deletion are atomic: a missing pending row can mean a
+      // second tab has already installed the final row since our first read.
       pair = await getPair(profile.id, remote.key_id);
     }
-    if (await publicFingerprint(pair.publicKey) !== remote.fingerprint_sha256)
+    const fingerprint = await publicFingerprint(pair.publicKey);
+    if (fingerprint !== remote.fingerprint_sha256)
       throw new FileError("KEY_CHANGED", "Khóa máy chủ khác khóa trên thiết bị.");
     // Prove the stored public/private keys belong together without exporting the private key.
     const challenge = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
     try {
       await unwrapAesKey(await wrapAesKey(challenge, pair.publicKey), pair.privateKey);
     } catch { throw new FileError("KEY_INVALID", "Cặp khóa trên thiết bị không khớp."); }
-    return { state: "ready", fingerprint: remote.fingerprint_sha256 };
+    return { state: "ready", fingerprint };
   }
 
   async function enroll() {
@@ -95,12 +105,20 @@ export function createKeyManager({ api, indexedDBImpl = globalThis.indexedDB } =
         };
       });
     }
-    // Verify persistence before publishing the public key.
-    await getPair(profile.id, "pending");
     const beforePublish = await api.me();
     if (beforePublish.id !== profile.id)
       throw new FileError("KEY_CHANGED", "Phiên tài khoản đã thay đổi. Vui lòng đăng nhập lại.");
     if (beforePublish.current_key) { await check(beforePublish); return beforePublish; }
+    // Verify persistence before publishing. If another tab has just consumed
+    // pending, reconcile its registered final key rather than creating a new one.
+    try { await getPair(profile.id, "pending"); }
+    catch (error) {
+      if (error.code !== "KEY_MISSING") throw error;
+      const fresh = await api.me();
+      if (fresh.id !== profile.id || !fresh.current_key) throw error;
+      await check(fresh);
+      return fresh;
+    }
     try {
       await api.registerKey({ public_key_jwk: await exportPublicKey(pending.publicKey) });
     } catch (error) {

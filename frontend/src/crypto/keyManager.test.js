@@ -22,6 +22,96 @@ function fixture() {
   return { db, api, keys: createKeyManager({ api, indexedDBImpl: db }) };
 }
 
+// Queue a second tab's write immediately after a selected read, before the next
+// transaction. This forces the interleaving instead of relying on RSA timings.
+function interleaveAfterRead(db, key, write) {
+  let triggered = false;
+  return {
+    open(...args) {
+      const request = db.open(...args);
+      request.addEventListener("success", () => {
+        const connection = request.result;
+        const transaction = connection.transaction.bind(connection);
+        connection.transaction = (...params) => {
+          const tx = transaction(...params);
+          const objectStore = tx.objectStore.bind(tx);
+          tx.objectStore = (...names) => {
+            const store = objectStore(...names);
+            const get = store.get.bind(store);
+            store.get = (query) => {
+              const result = get(query);
+              if (params[1] === "readonly" && query[1] === key && !triggered) {
+                result.addEventListener("success", () => {
+                  if (triggered) return;
+                  triggered = true;
+                  write(transaction("keys", "readwrite").objectStore("keys"));
+                });
+              }
+              return result;
+            };
+            return store;
+          };
+          return tx;
+        };
+      });
+      return request;
+    },
+  };
+}
+
+async function pendingRegistration() {
+  const f = fixture();
+  const register = f.api.registerKey.getMockImplementation();
+  const me = f.api.me.getMockImplementation();
+  f.api.registerKey.mockImplementation(async (body) => {
+    await register(body);
+    f.api.me.mockRejectedValue(new Error("offline after commit"));
+    throw new Error("lost response");
+  });
+  await expect(f.keys.enroll()).rejects.toThrow("offline");
+  f.api.me.mockImplementation(me);
+  const profile = await f.api.me();
+  const pending = await createDeviceKeyProvider({ indexedDBImpl: f.db })(userId, "pending");
+  return { ...f, profile, pending };
+}
+
+it("accepts the finalized key when another tab moves pending after the first lookup misses", async () => {
+  const { api, db, profile, pending } = await pendingRegistration();
+  const interleaved = interleaveAfterRead(db, keyId, (store) => {
+    store.put({ ...pending, keyId });
+    store.delete([userId, "pending"]);
+  });
+  const keys = createKeyManager({ api, indexedDBImpl: interleaved });
+  await expect(keys.check(profile)).resolves.toMatchObject({ state: "ready" });
+  expect((await createDeviceKeyProvider({ indexedDBImpl: db })(userId, keyId)).privateKey.extractable).toBe(false);
+});
+
+it("reconciles enrollment if pending disappears while another tab completes registration", async () => {
+  const { api, db, profile, pending } = await pendingRegistration();
+  const emptyProfile = { ...profile, current_key: null };
+  api.me.mockResolvedValueOnce(emptyProfile).mockResolvedValueOnce(emptyProfile).mockResolvedValue(profile);
+  api.registerKey.mockClear();
+  const interleaved = interleaveAfterRead(db, "pending", (store) => {
+    store.put({ ...pending, keyId });
+    store.delete([userId, "pending"]);
+  });
+  const keys = createKeyManager({ api, indexedDBImpl: interleaved });
+  await expect(keys.enroll()).resolves.toMatchObject({ current_key: profile.current_key });
+  expect(api.registerKey).not.toHaveBeenCalled();
+});
+
+it("does not overwrite a conflicting finalized private key during pending recovery", async () => {
+  const { api, db, profile } = await pendingRegistration();
+  const replacement = await generateKeyPair();
+  const interleaved = interleaveAfterRead(db, keyId, (store) => {
+    store.put({ userId, keyId, ...replacement });
+  });
+  const keys = createKeyManager({ api, indexedDBImpl: interleaved });
+  await expect(keys.check(profile)).rejects.toMatchObject({ code: "KEY_CHANGED" });
+  const saved = await createDeviceKeyProvider({ indexedDBImpl: db })(userId, keyId);
+  expect(await publicFingerprint(saved.publicKey)).toBe(await publicFingerprint(replacement.publicKey));
+});
+
 it("persists non-extractable keys and uses them after reload for file round-trip", async () => {
   const { db, api, keys } = fixture();
   const profile = await keys.enroll();

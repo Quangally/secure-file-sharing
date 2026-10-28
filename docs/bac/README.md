@@ -26,6 +26,10 @@ Sau đăng ký, đọc `/me`, đối chiếu fingerprint SHA-256 của SPKI, chu
 
 Khi kiểm tra khóa, xác nhận thuộc tính private key, fingerprint public key và thử wrap/unwrap một AES key tạm để xác minh hai khóa thuộc cùng một cặp. Không xuất private key.
 
+Fingerprint để gửi cho người khác đối chiếu chỉ hiển thị sau khi `check(profile)` thành công, lấy từ public key trên thiết bị. Khi đang kiểm tra, thiếu khóa hoặc khóa server không khớp, không hiển thị fingerprint server như fingerprint của thiết bị. Trang Cài đặt dùng cùng phần xác minh này, không có bản hiển thị riêng từ `/me`. Đổi profile sẽ ẩn kết quả cũ ngay; phản hồi kiểm tra cũ không được thay kết quả mới.
+
+Phục hồi `pending` kiểm tra lại record chính thức trong transaction readwrite trước khi thêm, không ghi đè private key đã tồn tại. Nếu một tab khác vừa chuyển và xóa `pending`, tab hiện tại đọc lại record chính thức và kiểm tra cặp khóa. Enrollment cũng đối chiếu lại `/me` nếu `pending` biến mất giữa các bước; không tự tạo khóa thay thế để bỏ qua lỗi.
+
 Các pin dùng record `keyId = trusted:<recipient-user-id>`, chỉ lưu fingerprint; được phân tách theo tài khoản hiện tại. Pin được giữ qua logout. Xóa dữ liệu trình duyệt cũng xóa pin.
 
 ## Xác minh người nhận
@@ -33,6 +37,14 @@ Các pin dùng record `keyId = trusted:<recipient-user-id>`, chỉ lưu fingerpr
 Lần đầu chia sẻ: lấy fingerprint từ người nhận qua kênh độc lập, nhập vào hộp thoại; ứng dụng đối chiếu với SHA-256 SPKI rồi ghi pin. Những lần tiếp theo phải khớp pin. Khi thay đổi, cảnh báo và yêu cầu đối chiếu lại. So fingerprint do server trả với public key chỉ kiểm tra tính nhất quán, không thay thế việc xác minh bên ngoài.
 
 Non-extractable không ngăn mã JavaScript độc hại sử dụng khóa. Client/thiết bị phải đáng tin cậy. Thu hồi chỉ chặn truy cập mới, không xóa bản sao đã tải. Các giới hạn này cũng được nêu trong threat model.
+
+## Chạy thử trên máy của nhóm
+
+1. Lấy nhánh có phần khóa sau khi review, cài `frontend` bằng `npm ci`; chạy backend tài khoản với `DATABASE_URL` đúng MySQL của máy mình theo [hướng dẫn MySQL](../database/mysql-setup.md). Giữ cả terminal backend và frontend đang chạy.
+2. Chạy `npm run dev` trong `frontend`, mở `http://127.0.0.1:5173`, tự đăng ký/đăng nhập. Chọn **Tạo khóa trên thiết bị này** ở phần **Khóa mã hóa trên thiết bị**. Chờ thông báo khóa sẵn sàng và fingerprint đã xác minh.
+3. Tải lại trang, đăng xuất rồi đăng nhập lại. Khóa phải vẫn được kiểm tra thành công. Giữ đúng địa chỉ web, cùng trình duyệt và hồ sơ đã tạo khóa. IndexedDB gắn với origin: `localhost:5173` và `127.0.0.1:5173` là hai kho riêng; đổi host/cổng không tự chuyển khóa.
+4. Khi API tệp của Vũ sẵn sàng, tạo A và B (có thể dùng hai hồ sơ trình duyệt để mô phỏng hai thiết bị). B gửi fingerprint **đã xác minh trên thiết bị B** cho A qua kênh liên lạc đã xác thực; A nhập mã đó trong hộp chia sẻ. Không dùng fingerprint do chính hộp tra cứu người nhận cung cấp làm nguồn xác minh độc lập.
+5. A upload, share cho B, B download và so byte gốc; kiểm tra khóa đã pin sau reload, từ chối khóa bị thay thế, từ chối ciphertext bị sửa và thu hồi quyền chặn cả envelope lẫn content. Mất private key thật thì báo thiếu khóa, không đề nghị ghi đè bằng khóa mới.
 
 ## Kiểm thử
 
@@ -52,3 +64,14 @@ Benchmark 1/10/25 MiB cần ghi máy, trình duyệt, số lần đo và tách A
 - `git diff --check`: đạt.
 
 Môi trường chạy Node 25.9.0; npm cảnh báo phiên bản này ngoài dải hỗ trợ đã khai báo. CI của repo dùng Node 24; chưa xác nhận lần chạy CI cho thay đổi này. Chưa chạy trình duyệt thật hoặc API/MySQL/storage end-to-end. Không suy ra các kết quả đó từ jsdom, fake-indexeddb và transport giả.
+
+## Kết quả bản sửa ngày 28 tháng 10 năm 2026
+
+- Node 24.22.1, nằm trong dải hỗ trợ của dự án.
+- `npm test`: 54/54 test đạt, 10 test files. Các regression test mới đã lỗi trên bản cũ trước khi sửa.
+- Test UI chặn fingerprint chưa xác minh cả ở DeviceKeys và Cài đặt, ẩn kết quả cũ khi profile thay đổi và bỏ qua check trả về muộn.
+- Test IndexedDB chủ động sắp xếp hai transaction để tái hiện chuyển `pending` ở tab khác, mất `pending` trong enrollment và xung đột record chính thức; không phụ thuộc timing ngẫu nhiên của RSA.
+- `npm run test:crypto`: 5/5 test đạt. `npm run build` và `git diff --check`: đạt.
+- Kiểm tra ghép bổ sung với code backend Vũ tại `b8dcbce`: Web Crypto thật, fake-indexeddb, FastAPI TestClient, SQLite và storage tạm. Hai user đăng ký khóa, upload ciphertext, pin public key, share và giải mã đúng byte; revoke chặn cả envelope/content.
+
+Đây chưa phải nghiệm thu trình duyệt thật hoặc MySQL thật. Các lỗi API/UI đã review trong nhánh Vũ vẫn cần Vũ xử lý trước khi ghép lên main. Benchmark AES/RSA trên trình duyệt vẫn cần đo riêng theo cấu hình máy và phương pháp ở trên; các số lượng test không phải số đo hiệu năng.

@@ -107,7 +107,7 @@ export default function App() {
           </p>
         </aside>
         <main className="ss-main">
-          {profile && <DeviceKeys key={profile.id} profile={profile} keys={keys} onReady={(updated) => setProfile((current) => current?.id === updated.id ? updated : current)} onAuthRequired={authRequired} />}
+          {profile && <DeviceKeys key={`device-keys:${profile.id}`} profile={profile} keys={keys} onReady={(updated) => setProfile((current) => current?.id === updated.id ? updated : current)} onAuthRequired={authRequired} />}
           {profile ? view === "files" ? (
             <MyFilesPage
               key={profile.id}
@@ -128,7 +128,7 @@ export default function App() {
                 <p>{profile.email}</p>
                 <hr />
                 <h3>Khóa mã hóa hiện tại</h3>
-                {profile.current_key ? <p className="ss-fingerprint">{profile.current_key.fingerprint_sha256}</p> : <p>Chưa đăng ký khóa trên thiết bị.</p>}
+                <p>Kiểm tra và tạo khóa ở phần Khóa mã hóa trên thiết bị phía trên. Fingerprint chỉ xuất hiện sau khi khóa trên thiết bị được xác minh.</p>
               </section>
             </div>
           ) : (

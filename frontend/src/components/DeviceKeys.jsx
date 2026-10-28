@@ -2,14 +2,24 @@ import React, { useEffect, useState } from "react";
 import { errorMessage } from "../services/errors.js";
 
 export default function DeviceKeys({ profile, keys, onReady, onAuthRequired }) {
-  const [state, setState] = useState("checking");
+  const [verification, setVerification] = useState(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  // Do not reuse a previous check even for one render after the account/key
+  // profile changes. Only a successful local check supplies a displayable hash.
+  const current = verification?.profile === profile && verification?.keys === keys
+    ? verification : { state: "checking" };
+  const state = current.state;
   useEffect(() => {
     let active = true;
-    setState("checking");
-    keys.check(profile).then((result) => { if (active) setState(result.state); })
-      .catch((error) => { if (active) { setState("error"); setMessage(errorMessage(error)); } });
+    setVerification(null);
+    setMessage("");
+    keys.check(profile).then((result) => {
+      if (active) setVerification({ profile, keys, state: result.state,
+        fingerprint: result.state === "ready" ? result.fingerprint : undefined });
+    }).catch((error) => {
+      if (active) setVerification({ profile, keys, state: "error", message: errorMessage(error) });
+    });
     return () => { active = false; };
   }, [profile, keys]);
   async function create() {
@@ -24,8 +34,11 @@ export default function DeviceKeys({ profile, keys, onReady, onAuthRequired }) {
     <h3>Khóa mã hóa trên thiết bị</h3>
     {state === "checking" && <p role="status">Đang kiểm tra khóa…</p>}
     {state === "ready" && <p>Khóa đã sẵn sàng để mã hóa và mở tệp.</p>}
-    {profile.current_key && <p className="ss-fingerprint">{profile.current_key.fingerprint_sha256}</p>}
-    {message && <p role="alert">{message}</p>}
+    {state === "ready" && current.fingerprint && <>
+      <p className="ss-fingerprint" aria-label="Fingerprint đã xác minh">{current.fingerprint}</p>
+      <p>Gửi fingerprint này cho người chia sẻ qua kênh liên lạc đã xác thực để đối chiếu khóa.</p>
+    </>}
+    {(message || current.message) && <p role="alert">{message || current.message}</p>}
     {state === "new" && <>
       <p>Tạo khóa để bắt đầu tải lên và nhận tệp. Khóa riêng được giữ trong trình duyệt này.</p>
       <p>Xóa dữ liệu trình duyệt hoặc mất thiết bị sẽ khiến bạn không mở được các tệp cũ. Đổi mật khẩu không khôi phục khóa. Phiên bản này chưa hỗ trợ sao lưu hoặc chuyển khóa sang thiết bị khác.</p>
