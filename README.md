@@ -4,7 +4,7 @@
 
 ## Trạng thái
 
-Đã có schema MySQL 6 bảng, Alembic migration, connection factory SQLAlchemy, backend tài khoản (đăng ký, đăng nhập, session, hồ sơ, tra người nhận, public key), giao diện kho tệp, adapter API và kiểm thử. Mã hóa chạy phía client qua Web Crypto. Backend API tệp/chia sẻ và luồng tạo khóa trên thiết bị vẫn cần ghép; các trang tệp có thể báo API chưa sẵn sàng.
+Đã có schema MySQL 6 bảng, Alembic migration, connection factory SQLAlchemy, backend tài khoản (đăng ký, đăng nhập, session, hồ sơ, tra người nhận, public key), giao diện kho tệp, adapter API và kiểm thử. Mã hóa chạy phía client qua Web Crypto. Đã nối luồng tạo/lưu/đăng ký khóa trên thiết bị, phục hồi đăng ký và xác minh/pin fingerprint người nhận. Backend API tệp/chia sẻ vẫn cần ghép; các trang tệp có thể báo API chưa sẵn sàng.
 
 Xem **[Bàn giao phần Quang](docs/quang/README.md)** để setup, nhúng trang vào frontend An và xem các phụ thuộc còn lại.
 
@@ -74,6 +74,7 @@ Kiểm tra phần Quang: `cd frontend`, chạy `npm test` (component, HTTP adapt
 - [Cách tạo repo trên GitHub web](docs/github-web-guide.md)
 - [Quy tắc làm việc nhóm](CONTRIBUTING.md)
 - [Luồng mã hóa và quản lý khóa](docs/security/encryption-flow.md)
+- [Bàn giao phần Bắc: quản lý khóa và tích hợp E2EE](docs/bac/README.md)
 - [Threat model và giới hạn](docs/security/threat-model.md)
 - [Hợp đồng API dự kiến](docs/api/contract.md)
 - [Thiết kế database](docs/database/schema.md)
