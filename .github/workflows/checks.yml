@@ -62,3 +62,15 @@ jobs:
         env:
           PYTHONPATH: backend
           MYSQL_TEST_URL: mysql+pymysql://root@127.0.0.1:3306
+  windows-startup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r backend/requirements.txt
+      - name: Test local config and the Windows launcher
+        run: python -m pytest backend/tests/test_local_startup.py -q
+        env:
+          PYTHONPATH: backend
