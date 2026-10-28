@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import MyFilesPage from "./pages/MyFilesPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import SharedFilesPage from "./pages/SharedFilesPage.jsx";
@@ -38,6 +38,7 @@ export default function App() {
   const [shareFile, setShareFile] = useState(null);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const hadAuthenticatedSession = useRef(false);
   function navigate(nextView) {
     window.location.hash = `/${nextView}`;
     setView(nextView);
@@ -65,10 +66,18 @@ export default function App() {
     api
       .me({ signal: controller.signal })
       .then((result) => {
-        if (!controller.signal.aborted) setProfile(result);
+        if (!controller.signal.aborted) {
+          hadAuthenticatedSession.current = true;
+          setProfile(result);
+        }
       })
       .catch((error) => {
-        if (!controller.signal.aborted) setError(errorMessage(error));
+        if (!controller.signal.aborted) {
+          // A first visit without a session is a normal login screen. Preserve
+          // errors for failed servers and sessions lost while using the app.
+          const anonymousVisit = error.status === 401 && !hadAuthenticatedSession.current;
+          setError(anonymousVisit ? "" : errorMessage(error));
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -81,6 +90,8 @@ export default function App() {
     try {
       await api.logout();
       api.setCsrfToken("");
+      hadAuthenticatedSession.current = false;
+      setError("");
       setProfile(null);
       setShareFile(null);
       navigate("files");
@@ -91,6 +102,7 @@ export default function App() {
     }
   }
   function authenticated(result) {
+    hadAuthenticatedSession.current = true;
     setError("");
     setProfile(result);
     setAttempt((value) => value + 1);

@@ -5,7 +5,10 @@ import userEvent from "@testing-library/user-event";
 const mocks = vi.hoisted(() => ({ me: vi.fn(), check: vi.fn(), login: vi.fn(), logout: vi.fn(), setCsrfToken: vi.fn() }));
 vi.mock("./services/fileApi.js", async (original) => ({ ...await original(), createFileApi: () => mocks }));
 vi.mock("./crypto/keyManager.js", () => ({ createKeyManager: () => ({ check: mocks.check }) }));
-vi.mock("./pages/MyFilesPage.jsx", () => ({ default: () => <h1>Tệp của tôi</h1> }));
+vi.mock("./pages/MyFilesPage.jsx", () => ({ default: ({ onAuthRequired }) => <>
+  <h1>Tệp của tôi</h1>
+  <button onClick={onAuthRequired}>Tải tệp khi phiên mất hiệu lực</button>
+</> }));
 vi.mock("./pages/SharedFilesPage.jsx", () => ({ default: () => <h1>Tệp được chia sẻ</h1> }));
 import App from "./App.jsx";
 import { FileError } from "./services/errors.js";
@@ -16,6 +19,27 @@ beforeEach(() => {
   window.history.replaceState(null, "", "/");
   mocks.me.mockResolvedValue(profile);
   mocks.check.mockResolvedValue({ state: "new" });
+});
+
+it("opens a clean login form when no session exists on initial load", async () => {
+  mocks.me.mockRejectedValue(new FileError("HTTP_401", "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", 401));
+  render(<App />);
+  await screen.findByRole("heading", { name: "Đăng nhập" });
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("keeps backend errors visible during the initial session check", async () => {
+  mocks.me.mockRejectedValue(new FileError("HTTP_500", "Máy chủ chưa sẵn sàng.", 500));
+  render(<App />);
+  expect(await screen.findByRole("alert")).toHaveTextContent("Máy chủ chưa sẵn sàng.");
+});
+
+it("shows an expiry notice when a signed-in operation loses its session", async () => {
+  render(<App />);
+  await userEvent.click(await screen.findByRole("button", { name: "Tải tệp khi phiên mất hiệu lực" }));
+  await screen.findByRole("heading", { name: "Đăng nhập" });
+  expect(screen.getByRole("alert")).toHaveTextContent("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+  expect(mocks.setCsrfToken).toHaveBeenCalledWith("");
 });
 
 it.each([
@@ -61,6 +85,7 @@ it("resets the page on explicit logout", async () => {
   await screen.findByRole("heading", { name: "Cài đặt", exact: true });
   await userEvent.click(screen.getByRole("button", { name: "Đăng xuất" }));
   expect(await screen.findByRole("heading", { name: "Đăng nhập" })).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(window.location.hash).toBe("#/files");
 });
 
