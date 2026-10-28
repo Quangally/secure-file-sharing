@@ -4,7 +4,7 @@
 
 ## Trạng thái
 
-Đã có schema MySQL 6 bảng, Alembic migration, connection factory SQLAlchemy, backend tài khoản (đăng ký, đăng nhập, session, hồ sơ, tra người nhận, public key), giao diện kho tệp, adapter API và kiểm thử. Mã hóa chạy phía client qua Web Crypto. Đã nối luồng tạo/lưu/đăng ký khóa trên thiết bị, phục hồi đăng ký và xác minh/pin fingerprint người nhận. Backend API tệp/chia sẻ vẫn cần ghép; các trang tệp có thể báo API chưa sẵn sàng.
+Đã có schema MySQL 6 bảng, Alembic migration, backend tài khoản và API upload/download/chia sẻ/thu hồi/xóa tệp. Mã hóa chạy phía client qua Web Crypto, khóa riêng lưu trong trình duyệt; đã tích hợp quản lý khóa và xác minh/pin fingerprint người nhận. Giao diện giữ trang đang mở khi tải lại. Xem hướng dẫn chạy và kiểm thử bên dưới.
 
 Xem **[Bàn giao phần Quang](docs/quang/README.md)** để setup, nhúng trang vào frontend An và xem các phụ thuộc còn lại.
 
@@ -30,7 +30,7 @@ Xem **[Bàn giao phần Quang](docs/quang/README.md)** để setup, nhúng trang
 | docs | Cả nhóm | Thiết kế, kế hoạch, báo cáo |
 | .github | TV1 + TV5 | CI, mẫu Issue và PR |
 
-## Chạy bộ khung
+## Chạy dự án
 
 Frontend (Node.js 24.15+ thuộc dòng 24 hoặc Node 22.22.2+ thuộc dòng 22):
 
@@ -40,18 +40,26 @@ npm ci
 npm run dev
 ```
 
-Backend (terminal khác, Windows PowerShell; đặt `DATABASE_URL` theo [hướng dẫn MySQL](docs/database/mysql-setup.md) trước khi gọi API tài khoản):
+Backend trên Windows: mở PowerShell tại thư mục gốc và chạy:
 
 ```powershell
-cd backend
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
+.\start-backend.cmd
 ```
 
-Linux/macOS: dùng `python3 -m venv .venv`, sau đó `.venv/bin/python -m pip install -r requirements.txt` và `.venv/bin/python -m uvicorn app.main:app --reload`.
+Lần đầu nhập tài khoản MySQL đang có và mật khẩu; trình khởi động tự tạo `.env` riêng trên máy, kiểm tra kết nối rồi mở backend. Những lần sau không cần nhập lại hoặc đặt `$env:DATABASE_URL`. File `.env` chứa mật khẩu DB dạng văn bản và đã được Git bỏ qua; không chia sẻ/commit file này. Khi đổi mật khẩu MySQL, dừng backend rồi chạy `.\start-backend.cmd --configure`.
 
-Frontend: http://localhost:5173. API: http://localhost:8000/health. Swagger: http://localhost:8000/docs. Vite chuyển `/api` tới backend; đăng ký/đăng nhập tự tạo cookie HttpOnly và frontend gọi `/me` để nhận CSRF token.
+Nếu chưa cài thư viện, chỉ cần cài một lần từ thư mục gốc:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+```
+
+Launcher cũng nhận venv cũ ở `backend/.venv`. Linux/macOS: tạo `.venv`, cài `backend/requirements.txt`, rồi chạy `.venv/bin/python scripts/start_backend.py`.
+
+Xem [hướng dẫn khởi động backend](docs/development/local-backend.md) để cấu hình MySQL khác và xử lý lỗi. Các lệnh uvicorn/Alembic thủ công vẫn dùng biến môi trường như trước; launcher không tự tạo bảng hoặc chạy migration.
+
+Frontend: http://127.0.0.1:5173. API: http://127.0.0.1:8000/health. Swagger: http://127.0.0.1:8000/docs. Vite chuyển `/api` tới backend; đăng ký/đăng nhập tự tạo cookie HttpOnly và frontend gọi `/me` để nhận CSRF token. Dùng thống nhất hostname/port để giữ đúng kho khóa IndexedDB.
 
 Database: xem [hướng dẫn MySQL](docs/database/mysql-setup.md). Nếu đã cài MySQL Server 8.4, chạy **database/01_schema.sql** trong Workbench là tạo đủ 6 bảng. Hoặc dùng Docker và Alembic theo hướng dẫn; chọn một cách tạo bảng. Backend /health không truy vấn database.
 
