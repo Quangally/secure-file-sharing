@@ -226,8 +226,8 @@ def test_share_and_revoke_flow(test_setup):
 
     # Xem danh sách người được share
     shares_list = client.get(f"/files/{file_id}/shares").json()
-    assert len(shares_list["recipients"]) == 1
-    assert shares_list["recipients"][0]["user_id"] == bob["id"]
+    assert len(shares_list["items"]) == 1
+    assert shares_list["items"][0]["user_id"] == bob["id"]
 
     # Đăng nhập lại Bob để kiểm tra xem file đã nhận chưa
     client.post("/auth/logout", headers={"X-CSRF-Token": alice_profile["csrf_token"]})
@@ -283,3 +283,101 @@ def test_delete_file_flow(test_setup):
     # Sau khi xóa: envelope 404, list files rỗng
     assert client.get(f"/files/{file_id}/envelope").status_code == 404
     assert client.get("/files").json()["total"] == 0
+
+
+def login_user(client, email):
+    response = client.post("/auth/login", json={
+        "email": email, "password": "correct horse battery staple",
+    })
+    assert response.status_code == 200, response.text
+    return client.get("/me").json()
+
+
+@pytest.fixture
+def shared_file(test_setup):
+    client, engine, storage = test_setup
+    owner = register_user(client, "owner@files.test")
+    file_id = str(uuid4())
+    response = client.post(
+        "/files", headers={"X-CSRF-Token": owner["csrf_token"]},
+        files={"ciphertext": ("file.bin", SAMPLE_CIPHERTEXT, "application/octet-stream")},
+        data={"manifest": json.dumps(make_manifest(file_id, owner["current_key"]["key_id"]))},
+    )
+    assert response.status_code == 201, response.text
+    recipient = register_user(client, "recipient@files.test")
+    owner = login_user(client, "owner@files.test")
+    payload = {
+        "recipient_user_id": recipient["id"],
+        "key_id": recipient["current_key"]["key_id"],
+        "verified_fingerprint_sha256": recipient["current_key"]["fingerprint_sha256"],
+        "wrapped_aes_key_base64": base64.b64encode(b"\xBB" * 256).decode(),
+    }
+    response = client.post(f"/files/{file_id}/shares", json=payload,
+                           headers={"X-CSRF-Token": owner["csrf_token"]})
+    assert response.status_code == 201, response.text
+    return client, engine, owner, recipient, file_id, payload
+
+
+def test_disabled_owner_blocks_shared_list_envelope_and_content(shared_file):
+    client, engine, owner, recipient, file_id, _ = shared_file
+    login_user(client, "recipient@files.test")
+    item = client.get("/files/shared-with-me").json()["items"][0]
+    assert item["shared_by"] == {
+        "id": owner["id"], "full_name": owner["full_name"], "email": owner["email"],
+    }
+    with engine.begin() as conn:
+        conn.execute(text("UPDATE users SET status='disabled' WHERE id=:id"), {"id": owner["id"]})
+    listing = client.get("/files/shared-with-me").json()
+    assert listing["items"] == []
+    assert listing["total"] == 0
+    assert client.get(f"/files/{file_id}/envelope").status_code == 404
+    assert client.get(f"/files/{file_id}/content").status_code == 404
+
+
+@pytest.mark.parametrize("bad_value", [[], None, "text", 123, True, {},
+    {"file_id": None}, {"file_id": 123}])
+def test_invalid_manifest_shape_returns_422_without_writes(test_setup, bad_value):
+    client, engine, storage = test_setup
+    owner = register_user(client)
+    response = client.post("/files", headers={"X-CSRF-Token": owner["csrf_token"]},
+                           files={"ciphertext": ("file.bin", SAMPLE_CIPHERTEXT)},
+                           data={"manifest": json.dumps(bad_value)})
+    assert response.status_code == 422, response.text
+    with engine.connect() as conn:
+        assert conn.execute(text("SELECT COUNT(*) FROM files")).scalar_one() == 0
+        assert conn.execute(text("SELECT COUNT(*) FROM audit_logs WHERE action='file.upload'")).scalar_one() == 0
+    assert list(storage.iterdir()) == []
+
+
+@pytest.mark.parametrize("field,value", [
+    ("owner_key_id", None), ("owner_key_id", 123),
+    ("protocol_version", True), ("protocol_version", "1"), ("protocol_version", 1.0),
+    ("protocol_version", 2), ("content_iv_base64", None),
+    ("metadata_iv_base64", []), ("encrypted_metadata_base64", 123),
+    ("owner_wrapped_aes_key_base64", {}),
+])
+def test_invalid_manifest_field_types_return_422(test_setup, field, value):
+    client, _, storage = test_setup
+    owner = register_user(client)
+    manifest = make_manifest(str(uuid4()), owner["current_key"]["key_id"])
+    manifest[field] = value
+    response = client.post("/files", headers={"X-CSRF-Token": owner["csrf_token"]},
+                           files={"ciphertext": ("file.bin", SAMPLE_CIPHERTEXT)},
+                           data={"manifest": json.dumps(manifest)})
+    assert response.status_code == 422, response.text
+    assert list(storage.iterdir()) == []
+
+
+def test_revoke_regrant_and_deleted_file_cannot_be_shared(shared_file):
+    client, engine, owner, recipient, file_id, payload = shared_file
+    headers = {"X-CSRF-Token": owner["csrf_token"]}
+    assert client.post(f"/files/{file_id}/shares", json=payload, headers=headers).status_code == 409
+    assert client.delete(f"/files/{file_id}/shares/{recipient['id']}", headers=headers).status_code == 204
+    assert client.get(f"/files/{file_id}/shares").json()["items"] == []
+    assert client.post(f"/files/{file_id}/shares", json=payload, headers=headers).status_code == 201
+    assert len(client.get(f"/files/{file_id}/shares").json()["items"]) == 1
+    assert client.delete(f"/files/{file_id}", headers=headers).status_code == 204
+    assert client.post(f"/files/{file_id}/shares", json=payload, headers=headers).status_code == 404
+    login_user(client, "recipient@files.test")
+    assert client.get(f"/files/{file_id}/content").status_code == 404
+    assert client.get(f"/files/{file_id}/envelope").status_code == 404

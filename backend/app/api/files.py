@@ -21,24 +21,21 @@ Quy tắc bảo mật:
 
 import base64
 import hashlib
-import json
 import os
 import re
 import secrets
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
 from fastapi.responses import Response, StreamingResponse
-from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import text
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from sqlalchemy import column, select, table, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.accounts import CurrentUser, DB, MutatingUser
-from app.database.session import get_session
 
 router = APIRouter()
 
@@ -55,6 +52,22 @@ PAGE_SIZE_MAX        = 100
 UUID_RE = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 )
+
+# Lightweight SQL expressions let SQLAlchemy compile real InnoDB locking reads.
+# SQLite omits FOR UPDATE in unit tests; MySQL integration tests run separately.
+_files = table("files", column("id"), column("owner_id"), column("status"))
+_users = table("users", column("id"), column("status"))
+_keys = table("public_keys", column("id"), column("user_id"),
+              column("fingerprint_sha256"), column("revoked_at"))
+_access = table("file_access", column("file_id"), column("user_id"), column("revoked_at"))
+
+
+def _lock_file(db: Session, file_id: str):
+    # All share/revoke/delete writers acquire this lock first. Locking reads see
+    # the latest committed state even under MySQL REPEATABLE READ.
+    return db.execute(
+        select(_files).where(_files.c.id == file_id).with_for_update()
+    ).mappings().first()
 
 
 def _storage_dir() -> Path:
@@ -134,6 +147,32 @@ class ShareBody(BaseModel):
         return v.lower()
 
 
+class UploadManifest(BaseModel):
+    model_config = ConfigDict(strict=True)
+
+    file_id: str
+    protocol_version: int
+    content_iv_base64: str
+    metadata_iv_base64: str
+    encrypted_metadata_base64: str
+    owner_key_id: str
+    owner_wrapped_aes_key_base64: str
+
+    @field_validator("file_id", "owner_key_id")
+    @classmethod
+    def check_uuid(cls, value: str) -> str:
+        if not UUID_RE.fullmatch(value.lower()):
+            raise ValueError("Phải là UUID hợp lệ.")
+        return value.lower()
+
+    @field_validator("protocol_version")
+    @classmethod
+    def check_protocol(cls, value: int) -> int:
+        if value != PROTOCOL_VERSION:
+            raise ValueError(f"Chỉ hỗ trợ protocol_version={PROTOCOL_VERSION}.")
+        return value
+
+
 # ── Helper lấy envelope của một user trên một file ───────────────────────────
 
 def _get_envelope_row(db: Session, file_id: str, user_id: str):
@@ -199,25 +238,17 @@ async def upload_file(
 
     # --- Parse manifest ---
     try:
-        m = json.loads(manifest)
-    except json.JSONDecodeError as exc:
-        raise HTTPException(422, "Manifest phải là JSON hợp lệ.") from exc
+        m = UploadManifest.model_validate_json(manifest)
+    except ValidationError as exc:
+        # Do not echo the manifest or encrypted envelopes in an error response.
+        raise HTTPException(422, "Manifest sai định dạng hoặc thiếu trường bắt buộc.") from exc
 
-    file_id          = validate_uuid(m.get("file_id", ""), "file_id")
-    protocol_version = m.get("protocol_version")
-    if protocol_version != PROTOCOL_VERSION:
-        raise HTTPException(422, f"Chỉ hỗ trợ protocol_version={PROTOCOL_VERSION}.")
-
-    content_iv_b64  = m.get("content_iv_base64",  "")
-    metadata_iv_b64 = m.get("metadata_iv_base64", "")
-    enc_meta_b64    = m.get("encrypted_metadata_base64", "")
-    owner_key_id    = validate_uuid(m.get("owner_key_id", ""), "owner_key_id")
-    owner_wrapped_b64 = m.get("owner_wrapped_aes_key_base64", "")
-
-    content_iv  = decode_b64(content_iv_b64,  "content_iv_base64")
-    metadata_iv = decode_b64(metadata_iv_b64, "metadata_iv_base64")
-    enc_meta    = decode_b64(enc_meta_b64,    "encrypted_metadata_base64")
-    owner_wrapped = decode_b64(owner_wrapped_b64, "owner_wrapped_aes_key_base64")
+    file_id = m.file_id
+    owner_key_id = m.owner_key_id
+    content_iv = decode_b64(m.content_iv_base64, "content_iv_base64")
+    metadata_iv = decode_b64(m.metadata_iv_base64, "metadata_iv_base64")
+    enc_meta = decode_b64(m.encrypted_metadata_base64, "encrypted_metadata_base64")
+    owner_wrapped = decode_b64(m.owner_wrapped_aes_key_base64, "owner_wrapped_aes_key_base64")
 
     if len(content_iv) != IV_LEN:
         raise HTTPException(422, "content_iv phải đúng 12 byte.")
@@ -236,11 +267,10 @@ async def upload_file(
 
     # --- Kiểm tra owner_key_id thuộc user hiện tại và chưa bị revoke ---
     key_row = db.execute(
-        text("""
-            SELECT id FROM public_keys
-            WHERE id = :key_id AND user_id = :user_id AND revoked_at IS NULL
-        """),
-        {"key_id": owner_key_id, "user_id": user["id"]},
+        select(_keys.c.id).where(
+            _keys.c.id == owner_key_id, _keys.c.user_id == user["id"],
+            _keys.c.revoked_at.is_(None),
+        ).with_for_update(read=True),
     ).mappings().first()
     if key_row is None:
         raise HTTPException(409, "owner_key_id không hợp lệ hoặc đã bị thu hồi.")
@@ -429,6 +459,7 @@ def shared_with_me(
             SELECT COUNT(*) AS cnt
             FROM files f
             JOIN file_access fa ON fa.file_id = f.id
+            JOIN users u ON u.id = f.owner_id AND u.status = 'active'
             WHERE fa.user_id     = :recipient
               AND fa.access_type = 'share'
               AND fa.revoked_at  IS NULL
@@ -454,6 +485,7 @@ def shared_with_me(
               AND fa.access_type = 'share'
               AND fa.revoked_at  IS NULL
               AND f.status       = 'ready'
+              AND u.status       = 'active'
             ORDER BY fa.granted_at DESC, f.id ASC
             LIMIT :limit OFFSET :offset
         """),
@@ -486,11 +518,12 @@ def get_envelope(file_id: str, user: CurrentUser, db: DB):
 
     file_row = db.execute(
         text("""
-            SELECT id, content_iv, metadata_iv, encrypted_metadata,
-                   protocol_version, ciphertext_size, ciphertext_sha256,
-                   created_at, updated_at, status
-            FROM files
-            WHERE id = :id
+            SELECT f.id, f.content_iv, f.metadata_iv, f.encrypted_metadata,
+                   f.protocol_version, f.ciphertext_size, f.ciphertext_sha256,
+                   f.created_at, f.updated_at, f.status
+            FROM files f
+            JOIN users owner ON owner.id = f.owner_id AND owner.status = 'active'
+            WHERE f.id = :id
         """),
         {"id": file_id},
     ).mappings().first()
@@ -523,9 +556,10 @@ def get_content(
 
     file_row = db.execute(
         text("""
-            SELECT id, storage_key, ciphertext_size, status, owner_id
-            FROM files
-            WHERE id = :id
+            SELECT f.id, f.storage_key, f.ciphertext_size, f.status, f.owner_id
+            FROM files f
+            JOIN users owner ON owner.id = f.owner_id AND owner.status = 'active'
+            WHERE f.id = :id
         """),
         {"id": file_id},
     ).mappings().first()
@@ -578,16 +612,7 @@ def get_content(
 def delete_file(file_id: str, user: MutatingUser, db: DB):
     file_id    = validate_uuid(file_id, "file_id")
     request_id = str(uuid4())
-    now        = utc_now()
-
-    file_row = db.execute(
-        text("""
-            SELECT id, owner_id, status
-            FROM files
-            WHERE id = :id
-        """),
-        {"id": file_id},
-    ).mappings().first()
+    file_row = _lock_file(db, file_id)
 
     if file_row is None:
         raise HTTPException(404, "Tệp không tồn tại.")
@@ -596,6 +621,7 @@ def delete_file(file_id: str, user: MutatingUser, db: DB):
     if file_row["status"] == "deleted":
         raise HTTPException(404, "Tệp đã bị xóa trước đó.")
 
+    now = utc_now()
     db.execute(
         text("""
             UPDATE files
@@ -624,7 +650,6 @@ def delete_file(file_id: str, user: MutatingUser, db: DB):
 def share_file(file_id: str, body: ShareBody, user: MutatingUser, db: DB):
     file_id    = validate_uuid(file_id, "file_id")
     request_id = str(uuid4())
-    now        = utc_now()
 
     wrapped_bytes = decode_b64(body.wrapped_aes_key_base64, "wrapped_aes_key_base64")
     if len(wrapped_bytes) != WRAPPED_AES_KEY_LEN:
@@ -635,14 +660,7 @@ def share_file(file_id: str, body: ShareBody, user: MutatingUser, db: DB):
         )
 
     # Khóa dòng file và xác nhận quyền owner
-    file_row = db.execute(
-        text("""
-            SELECT id, owner_id, status
-            FROM files
-            WHERE id = :id
-        """),
-        {"id": file_id},
-    ).mappings().first()
+    file_row = _lock_file(db, file_id)
 
     if file_row is None or file_row["status"] != "ready":
         raise HTTPException(404, "Tệp không tồn tại hoặc đã bị xóa.")
@@ -653,23 +671,19 @@ def share_file(file_id: str, body: ShareBody, user: MutatingUser, db: DB):
 
     # Kiểm tra người nhận tồn tại và còn active
     recipient = db.execute(
-        text("""
-            SELECT id FROM users
-            WHERE id = :uid AND status = 'active'
-        """),
-        {"uid": body.recipient_user_id},
+        select(_users.c.id).where(
+            _users.c.id == body.recipient_user_id, _users.c.status == "active",
+        ).with_for_update(read=True),
     ).mappings().first()
     if recipient is None:
         raise HTTPException(404, "Người nhận không tồn tại hoặc tài khoản bị vô hiệu hóa.")
 
     # Khóa và xác minh key_id thuộc recipient, còn active, fingerprint khớp
     key_row = db.execute(
-        text("""
-            SELECT id, fingerprint_sha256
-            FROM public_keys
-            WHERE id = :key_id AND user_id = :uid AND revoked_at IS NULL
-        """),
-        {"key_id": body.key_id, "uid": body.recipient_user_id},
+        select(_keys.c.id, _keys.c.fingerprint_sha256).where(
+            _keys.c.id == body.key_id, _keys.c.user_id == body.recipient_user_id,
+            _keys.c.revoked_at.is_(None),
+        ).with_for_update(read=True),
     ).mappings().first()
     if key_row is None:
         raise HTTPException(
@@ -688,17 +702,15 @@ def share_file(file_id: str, body: ShareBody, user: MutatingUser, db: DB):
 
     # Ghi hoặc cập nhật row chia sẻ (cấp lại sau khi đã revoke)
     existing = db.execute(
-        text("""
-            SELECT file_id, user_id, revoked_at
-            FROM file_access
-            WHERE file_id = :file_id AND user_id = :uid
-        """),
-        {"file_id": file_id, "uid": body.recipient_user_id},
+        select(_access).where(
+            _access.c.file_id == file_id, _access.c.user_id == body.recipient_user_id,
+        ).with_for_update(),
     ).mappings().first()
 
     if existing is not None and existing["revoked_at"] is None:
         raise HTTPException(409, "Người dùng đã được chia sẻ tệp này rồi.")
 
+    now = utc_now()
     if existing is not None:
         # Cấp lại quyền đã bị thu hồi
         db.execute(
@@ -798,7 +810,7 @@ def list_shares(file_id: str, user: CurrentUser, db: DB):
                            if isinstance(granted, datetime) else str(granted) + "Z"),
         })
 
-    return {"file_id": file_id, "recipients": recipients}
+    return {"file_id": file_id, "items": recipients}
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -815,25 +827,18 @@ def revoke_share(
     file_id        = validate_uuid(file_id, "file_id")
     target_user_id = validate_uuid(target_user_id, "target_user_id")
     request_id     = str(uuid4())
-    now            = utc_now()
 
     if target_user_id == user["id"]:
         raise HTTPException(422, "Không thể thu hồi quyền của chính mình (owner không thể revoke).")
 
-    file_row = db.execute(
-        text("""
-            SELECT id, owner_id, status
-            FROM files
-            WHERE id = :id
-        """),
-        {"id": file_id},
-    ).mappings().first()
+    file_row = _lock_file(db, file_id)
 
     if file_row is None or file_row["status"] != "ready":
         raise HTTPException(404, "Tệp không tồn tại hoặc đã bị xóa.")
     if file_row["owner_id"] != user["id"]:
         raise HTTPException(403, "Chỉ chủ tệp mới có thể thu hồi quyền chia sẻ.")
 
+    now = utc_now()
     result = db.execute(
         text("""
             UPDATE file_access

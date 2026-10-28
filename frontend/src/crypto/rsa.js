@@ -1,4 +1,4 @@
-// Khóa riêng non-extractable; tuần 3 bổ sung lưu CryptoKey trong IndexedDB.
+// Khóa riêng non-extractable; keyManager lưu CryptoKey trong IndexedDB.
 export async function generateKeyPair() {
   return crypto.subtle.generateKey({ name: 'RSA-OAEP', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }, false, ['wrapKey', 'unwrapKey']);
 }

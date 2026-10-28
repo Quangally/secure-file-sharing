@@ -39,3 +39,19 @@ it("refuses an envelope for the wrong file before downloading content", async ()
   ).rejects.toMatchObject({ code: "BAD_RESPONSE" });
   expect(api.content).not.toHaveBeenCalled();
 });
+it("does not fetch envelopes or share until the recipient is trusted", async () => {
+  const api = { envelope: vi.fn(), share: vi.fn() };
+  const requireTrusted = vi.fn(async () => { throw new Error("unverified"); });
+  await expect(createFileManager({ api, fileCrypto: {}, requireTrusted })
+    .share({ id: "file" }, {}, { id: "user" })).rejects.toThrow("unverified");
+  expect(api.envelope).not.toHaveBeenCalled();
+  expect(api.share).not.toHaveBeenCalled();
+});
+it("refuses the wrong owner envelope during sharing", async () => {
+  const api = { envelope: async () => ({ id: "other" }), share: vi.fn() };
+  const fileCrypto = { prepareShare: vi.fn() };
+  await expect(createFileManager({ api, fileCrypto, requireTrusted: async () => {} })
+    .share({ id: "file" }, {}, { id: "user" })).rejects.toMatchObject({ code: "BAD_RESPONSE" });
+  expect(fileCrypto.prepareShare).not.toHaveBeenCalled();
+  expect(api.share).not.toHaveBeenCalled();
+});
