@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import MyFilesPage from "./pages/MyFilesPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import SharedFilesPage from "./pages/SharedFilesPage.jsx";
@@ -21,16 +21,37 @@ const manager = createFileManager({
   fileCrypto: createFileCrypto({ getKeyPair: createDeviceKeyProvider() }),
 });
 
+const viewByHash = {
+  "#/files": "files",
+  "#/shared": "shared",
+  "#/settings": "settings",
+};
+const currentView = () => viewByHash[window.location.hash] || "files";
+
 // An can embed MyFilesPage in the account/sharing layout without replacing it.
 export default function App() {
   const [profile, setProfile] = useState(null),
     [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0),
     [loading, setLoading] = useState(true);
-  const [view, setView] = useState("files");
+  const [view, setView] = useState(currentView);
   const [shareFile, setShareFile] = useState(null);
   const [logoutBusy, setLogoutBusy] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const hadAuthenticatedSession = useRef(false);
+  function navigate(nextView) {
+    window.location.hash = `/${nextView}`;
+    setView(nextView);
+    setShareFile(null);
+  }
+  useEffect(() => {
+    const followLocation = () => {
+      setView(currentView());
+      setShareFile(null);
+    };
+    window.addEventListener("hashchange", followLocation);
+    return () => window.removeEventListener("hashchange", followLocation);
+  }, []);
   const authRequired = useCallback(() => {
     api.setCsrfToken("");
     setProfile(null);
@@ -45,10 +66,18 @@ export default function App() {
     api
       .me({ signal: controller.signal })
       .then((result) => {
-        if (!controller.signal.aborted) setProfile(result);
+        if (!controller.signal.aborted) {
+          hadAuthenticatedSession.current = true;
+          setProfile(result);
+        }
       })
       .catch((error) => {
-        if (!controller.signal.aborted) setError(errorMessage(error));
+        if (!controller.signal.aborted) {
+          // A first visit without a session is a normal login screen. Preserve
+          // errors for failed servers and sessions lost while using the app.
+          const anonymousVisit = error.status === 401 && !hadAuthenticatedSession.current;
+          setError(anonymousVisit ? "" : errorMessage(error));
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -61,9 +90,11 @@ export default function App() {
     try {
       await api.logout();
       api.setCsrfToken("");
+      hadAuthenticatedSession.current = false;
+      setError("");
       setProfile(null);
       setShareFile(null);
-      setView("files");
+      navigate("files");
     } catch (reason) {
       setLogoutError(errorMessage(reason));
     } finally {
@@ -71,6 +102,7 @@ export default function App() {
     }
   }
   function authenticated(result) {
+    hadAuthenticatedSession.current = true;
     setError("");
     setProfile(result);
     setAttempt((value) => value + 1);
@@ -78,7 +110,7 @@ export default function App() {
   return (
     <div className="ss-app">
       <header className="ss-topbar">
-        <a className="ss-brand" href="/" aria-label="Secure Share — Trang chủ">
+        <a className="ss-brand" href="#/files" aria-label="Secure Share — Trang chủ">
           <span>S</span>Secure Share
         </a>
         {profile && (
@@ -97,9 +129,9 @@ export default function App() {
       <div className="ss-layout">
         <aside className="ss-sidebar" aria-label="Điều hướng">
           <p>KHÔNG GIAN CỦA BẠN</p>
-          {profile && <button className={`ss-nav-button ${view === "files" ? "active" : ""}`} aria-current={view === "files" ? "page" : undefined} onClick={() => setView("files")}>▣ Tệp của tôi</button>}
-          {profile && <button className={`ss-nav-button ${view === "shared" ? "active" : ""}`} aria-current={view === "shared" ? "page" : undefined} onClick={() => setView("shared")}>↗ Được chia sẻ</button>}
-          {profile && <button className={`ss-nav-button ${view === "settings" ? "active" : ""}`} aria-current={view === "settings" ? "page" : undefined} onClick={() => setView("settings")}>⚙ Cài đặt</button>}
+          {profile && <button className={`ss-nav-button ${view === "files" ? "active" : ""}`} aria-current={view === "files" ? "page" : undefined} onClick={() => navigate("files")}>▣ Tệp của tôi</button>}
+          {profile && <button className={`ss-nav-button ${view === "shared" ? "active" : ""}`} aria-current={view === "shared" ? "page" : undefined} onClick={() => navigate("shared")}>↗ Được chia sẻ</button>}
+          {profile && <button className={`ss-nav-button ${view === "settings" ? "active" : ""}`} aria-current={view === "settings" ? "page" : undefined} onClick={() => navigate("settings")}>⚙ Cài đặt</button>}
           <p className="ss-sidebar-note">
             Kho tệp cá nhân
             <br />
