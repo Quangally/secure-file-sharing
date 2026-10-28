@@ -54,7 +54,7 @@ export default function SharedFilesPage({ api, profile, manager, onAuthRequired 
         state === "error" ? <div className="ss-empty"><h3>Chưa tải được danh sách</h3><p>Hãy kiểm tra kết nối rồi thử lại.</p></div> :
         !items.length ? <div className="ss-empty"><div className="ss-empty-icon">◇</div><h3>Chưa có tệp được chia sẻ</h3><p>Khi một người cấp quyền, tệp sẽ xuất hiện ở đây.</p></div> :
         <ul className="ss-file-list ss-file-panel">{items.map((item) => <li className="ss-file-row" key={item.id}>
-          <div className="ss-file-symbol">↗</div><div className="ss-file-description"><h3>{item.name || "Tệp được chia sẻ"}</h3><p>{formatSize(item.size)} · Chia sẻ bởi {item.shared_by || "người dùng khác"}</p></div>
+          <div className="ss-file-symbol">↗</div><div className="ss-file-description"><h3>{item.name || "Tệp được chia sẻ"}</h3><p>{formatSize(item.size)} · Chia sẻ bởi {item.shared_by?.full_name || item.shared_by?.email || "người dùng khác"}</p></div>
           <button className="ss-button secondary" disabled={busy} onClick={() => download(item)}>Tải xuống</button>
         </li>)}</ul>}
     </div>

@@ -1,6 +1,6 @@
 # Hợp đồng tích hợp đề xuất
 
-Đây là contract v1 mà trang kho tệp của Quang đang gọi. API tài khoản đã triển khai; API tệp/chia sẻ còn cần triển khai. IDs là UUID chữ thường. Thời gian API dùng ISO 8601 có Z; SQL dùng DATETIME(6) UTC. Khi dùng SQLAlchemy, chuyển datetime có timezone về UTC trước khi ghi và gắn timezone UTC khi serialize.
+Đây là contract v1 mà frontend đang gọi. API tài khoản và tệp/chia sẻ đã triển khai. IDs là UUID chữ thường. Thời gian API dùng ISO 8601 có Z; SQL dùng DATETIME(6) UTC. Khi dùng SQLAlchemy, chuyển datetime có timezone về UTC trước khi ghi và gắn timezone UTC khi serialize.
 
 ## Phiên đăng nhập và phản hồi tài khoản
 
@@ -94,6 +94,8 @@ page bắt đầu từ 1, page_size của trang Quang là 20. Backend áp dụng
 
 Mỗi item có id, content_iv_base64, metadata_iv_base64, encrypted_metadata_base64, protocol_version, key_id, wrapped_aes_key_base64 của user hiện tại, ciphertext_size và timestamps. Tệp của tôi có thêm share_count; danh sách nhận có shared_by/shared_at.
 
+`shared_by` là object `{id, full_name, email}` của chủ tệp. UI hiển thị `shared_by.full_name`, dự phòng bằng email hoặc “người dùng khác”; không render trực tiếp object. Danh sách nhận và total cùng loại bỏ tệp của chủ đã bị disabled. Envelope/content cũng từ chối các tệp này (404).
+
 GET /files/{id}/envelope trả một item tương tự, bắt buộc thêm ciphertext_sha256 dạng hex thường 64 ký tự. GET /files/{id}/content trả bytes C||tag, không redirect sang trang HTML/login hoặc URL storage công khai. Giới hạn nội dung gốc 25 MiB; ciphertext đúng size+16. API phải kiểm tra quyền riêng ở cả hai endpoint. POST /files thành công trả 201 JSON {"id":"UUID-vừa-upload"}; DELETE /files/{id} thành công trả 204 không body. Không trả thành công trước khi transaction/storage hoàn tất.
 
 Client gọi helper của Bắc để unwrap/decrypt metadata rồi tạo view model `{name,mimeType,size,updatedAt,shareCount}` cho giao diện. Không lấy ciphertext_size làm size gốc nếu muốn hiển thị đúng số byte của tệp trước mã hóa.
@@ -111,8 +113,12 @@ Client gọi helper của Bắc để unwrap/decrypt metadata rồi tạo view m
 
 Không có raw_aes_key, private_key, owner_id lấy từ UI. Owner_id/current_user_id luôn lấy qua phiên. Nếu recipient chưa đăng ký/chưa có key thì UI thông báo, không tự tạo user từ chuỗi người nhận. Tình huống key thay đổi giữa lookup và POST phải từ chối/yêu cầu xác minh lại, không im lặng dùng key mới.
 
+GET `/files/{id}/shares` trả `{file_id, items: [{user_id, full_name, email, key_id, granted_at}]}`. Danh sách chỉ gồm share đang hoạt động của người nhận active; frontend dùng `items` để hiện người nhận và nút thu hồi. Cấp quyền trùng trả 409; sau khi thu hồi có thể cấp lại trên cùng cặp `(file_id, user_id)`.
+
+Manifest upload được kiểm tra kiểu nghiêm ngặt: JSON phải là object đủ trường, UUID/Base64 là chuỗi và protocol_version là số nguyên 1 (không nhận boolean, số thực hoặc chuỗi). Dữ liệu sai trả 422 trước khi ghi storage/DB.
+
 ## Mẫu gọi SQL
 
-Trong PyMySQL dùng `cursor.execute(sql, params)`; trong SQLAlchemy chuyển placeholder sang `:name` và bind parameters. `04_nghiep_vu.sql` dùng cú pháp PyMySQL, không phải f-string. Kiểm tra rowcount và ghi audit cùng transaction. Nếu lock_owned_file hoặc lock_recipient_key không có kết quả, dừng trước khi insert/update. Không cho frontend kết nối trực tiếp MySQL.
+Trong PyMySQL dùng `cursor.execute(sql, params)`; trong SQLAlchemy chuyển placeholder sang `:name` và bind parameters. Xem `database/examples/write_queries.sql`, không ghép tham số bằng f-string. Kiểm tra rowcount và ghi audit cùng transaction. Share/revoke/delete khóa dòng file bằng FOR UPDATE trước khi kiểm tra và ghi. Share dùng locking read cho recipient, key và file_access để đọc trạng thái vừa commit sau khi chờ khóa, kể cả dưới MySQL REPEATABLE READ; public key và recipient được giữ shared lock đến hết transaction. SQLAlchemy biên dịch shared lock thành LOCK IN SHARE MODE trên MySQL. Không cho frontend kết nối trực tiếp MySQL.
 
 Các lỗi cần thống nhất gồm chưa đăng nhập/hết phiên, email trùng, người nhận không tồn tại/chưa có key, không có quyền, key thay đổi, payload sai định dạng và quá dung lượng. GCM tag sai được phát hiện ở client khi giải mã, không trả lỗi giả “giải mã thành công” từ backend chỉ dựa vào SHA-256.
