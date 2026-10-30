@@ -148,6 +148,13 @@ p {
   max-width: 1520px;
   margin: auto;
 }
+.ss-device-keys-page {
+  padding-bottom: 0;
+}
+.ss-device-keys-page .ss-settings-card {
+  width: 100%;
+  margin-top: 0;
+}
 .ss-page-heading {
   display: flex;
   gap: 24px;

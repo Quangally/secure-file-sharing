@@ -139,7 +139,9 @@ export default function App() {
           </p>
         </aside>
         <main className="ss-main">
-          {profile && <DeviceKeys key={`device-keys:${profile.id}`} profile={profile} keys={keys} onReady={(updated) => setProfile((current) => current?.id === updated.id ? updated : current)} onAuthRequired={authRequired} />}
+          {profile && <div className="ss-page ss-device-keys-page">
+            <DeviceKeys key={`device-keys:${profile.id}`} profile={profile} keys={keys} onReady={(updated) => setProfile((current) => current?.id === updated.id ? updated : current)} onAuthRequired={authRequired} />
+          </div>}
           {profile ? view === "files" ? (
             <MyFilesPage
               key={profile.id}
